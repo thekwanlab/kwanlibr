@@ -1,3 +1,17 @@
+#=============================================================================
+# coreEdgeR is a package that contains wrapper functions
+# for edgeR functions.
+# They were originally for [...]
+
+#---------
+# TO-DO
+#---------
+# - create testing suite?
+# - changelog?
+# - create runable examples?
+#=============================================================================
+
+# install dependencies
 if (length(find.package("librarian", quiet=TRUE)) == 0) {
   install.packages("librarian")
 }
@@ -12,14 +26,38 @@ librarian::shelf(
   ask=FALSE
 )
 
-kwanlibr_get_gtf <- function(gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.annotation.gtf',
-                             verbose=FALSE) {
-  important_tags <- c("gene_id", "gene_type", "gene_name") # Also defined in kwanlibr_perform_edger
+#constants
+IMPORTANT_TAGS <- c("gene_id", "gene_type", "gene_name")
+
+
+#---------------------
+# Functions
+#---------------------
+
+#' Get reference
+#'
+#' kwanlibr_get_gtf(gtf, verbose) returns the reference specified by
+#' the path gtf. 
+#' @param gtf absolute path to the reference
+#' @param verbose set to TRUE to print number of rows. Default is FALSE
+#' @return A dataframe of the reference genome 
+#' @keywords reference
+#' @export
+#' @examples
+#' kwanlibr_get_gtf(gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.ERCC.annotation.gtf')
+
+kwanlibr_get_gtf <- function(
+  gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.annotation.gtf',
+  verbose=FALSE
+) {
+  
   ## Read in reference genome for location info
-  gtf <- rtracklayer::readGFF(gtf,
-                 columns = c("seqid", "start", "end"),
-                 tags = important_tags,
-                 filter = list(type=c("gene")))
+  gtf <- rtracklayer::readGFF(
+    gtf,
+    columns=c("seqid", "start", "end"),
+    tags=IMPORTANT_TAGS,
+    filter=list(type=c("gene"))
+  )
   
   if (verbose) {
     print(paste("Number of Rows:", nrow(gtf)))
@@ -28,16 +66,35 @@ kwanlibr_get_gtf <- function(gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/
   return(gtf)
 }
 
-#kwanlibr_read_data()
 
+#' Perform edgeR
+#'
+#' kwanlibr_perform_edger(
+#' sampleTable, fileCol, idCol, condCol, batchCol, filePrefix, gtf, saveName) 
+#' performs edger analysis on sampleTable
+#' @param sampleTable a dataframe with sample data
+#' @param fileCol header that refers to column names
+#' @param idCol header that refers to the unique identifier of each sample
+#' @param condCol header that refers to the condition of each sample
+#' @param batchCol header that refers to the batch of the sample
+#' @param filePrefix prefix that the sample files start with. Default is NULL
+#' @param gtf reference genome
+#' @param saveName filename to save edger tables under
+#' @return A dataframe of the edger analysis
+#' @keywords edger
+#' @export
+#' @examples
+#' kwanlibr_perform_edger(smc3, idCol="Pool.Name", gtf=gtf, saveName="tables/Smc3EdgeR")
 
-kwanlibr_perform_edger <- function(sampleTable,
-                                   fileCol="Filename", 
-                                   idCol="Sample", 
-                                   condCol="condition",
-                                   batchCol=NULL,
-                                   filePrefix=NULL, gtf=NULL,
-                                   saveName=NULL) {
+kwanlibr_perform_edger <- function(
+  sampleTable,
+  fileCol="Filename", 
+  idCol="Sample", 
+  condCol="condition",
+  batchCol=NULL,
+  filePrefix=NULL, gtf=NULL,
+  saveName=NULL
+) {
   if (class(filePrefix) == "NULL") {
     filePrefix <- getwd()
   }
@@ -46,21 +103,21 @@ kwanlibr_perform_edger <- function(sampleTable,
   if (class(gtf) == "NULL") {
     gtf <- kwanlibr_get_gtf()
   }
-  
-  important_tags <- c("gene_id", "gene_type", "gene_name") # Also defined in kwanlibr_get_gtf
-  
+    
   if(class(batchCol) == "NULL"){
     sampleTable <- data.frame(
       sampleName = sampleTable[[idCol]],
       files = file.path(filePrefix, sampleTable[[fileCol]]),
-      condition = sampleTable[[condCol]])
+      condition = sampleTable[[condCol]]
+    )
   }
   else{
     sampleTable <- data.frame(
       sampleName = sampleTable[[idCol]],
       files = file.path(filePrefix, sampleTable[[fileCol]]),
       condition = sampleTable[[condCol]],
-      batch = sampleTable[[batchCol]])
+      batch = sampleTable[[batchCol]]
+    )
   }
   
   ## Perform analysis
@@ -68,17 +125,26 @@ kwanlibr_perform_edger <- function(sampleTable,
   ## remove last rows to avoid problems with edger as they are meta tags, not genes
   dge$counts <- head(dge$count, -5)
   ## Add in gene names to use later on
-  merged_dge_genes <- merge(dge$counts, gtf, by.x = "row.names", by.y = "gene_id")
+  merged_dge_genes <- merge(
+    dge$counts,
+    gtf,
+    by.x = "row.names",
+    by.y = "gene_id"
+  )
   ## Column name gets lost in merge to become "Row.names"
   colnames(merged_dge_genes)[1] <- "gene_id"
-  dge$genes <- merged_dge_genes[,important_tags]
+  dge$genes <- merged_dge_genes[,IMPORTANT_TAGS]
   ## Remove variable to save on memory
   remove(merged_dge_genes)
   dge <- calcNormFactors(dge)
   if(class(batchCol) == "NULL"){
-    design <- model.matrix(~ droplevels(sampleTable[["condition"]]))
+    design <- model.matrix(
+      ~ droplevels(sampleTable[["condition"]])
+    )
   } else {
-    design <- model.matrix(~ sampleTable[["condition"]] + sampleTable[["batch"]])
+    design <- model.matrix(
+      ~ sampleTable[["condition"]] + sampleTable[["batch"]]
+    )
   }
   dge <- estimateDisp(dge, design)
   fit <- glmFit(dge, design)
@@ -88,33 +154,106 @@ kwanlibr_perform_edger <- function(sampleTable,
   
   if (class(saveName) != "NULL") {
     final_table <- as.data.frame(topTags(lrt, n = nrow(dge$counts)))
-    dir.create(dirname(saveName), recursive = TRUE, showWarnings = FALSE)
-    write.csv(final_table, file=paste(saveName, ".csv", sep=""))
-    write.csv(topTags(lrt, n = 5000), file=paste(saveName, "_top5k.csv", sep=""))
-    
+    dir.create(
+      dirname(saveName),
+      recursive = TRUE,
+      showWarnings = FALSE
+    )
+    write.csv(
+      final_table,
+      file=paste(saveName, ".csv", sep="")
+    )
+    write.csv(
+      topTags(lrt, n = 5000),
+      file=paste(saveName, "_top5k.csv", sep="")
+    ) 
   }
   
   return(lrt)
 }
 
+
+#' Get a subset of table rows
+#'
+#' kwanlibr_subset(sampleTable, col, ...) selects a subset of rows from 
+#' sampleTable where the value of col is in ... 
+#' @param sampleTable table we want to subset
+#' @param col subset sampleTable based on value of col
+#' @return A dataframe with the subset of selected rows
+#' @keywords subset
+#' @export
+#' @examples
+#' kwanlibr_subset(smc3, "Pool.Name", "Smc")
+
 kwanlibr_subset <- function(sampleTable, col, ...) {
-  return(sampleTable[grepl(paste(c(...), collapse="|"), sampleTable[[col]], perl=TRUE),])
+  return(
+    sampleTable[grepl(paste(c(...), collapse="|"),
+    sampleTable[[col]], perl=TRUE),]
+  )
 }
 
+
+#' Label samples as ko (knockout) or CON (control)
+#'
+#' kwanlibr_label_con(sampleTable, col, pattern) labels a sample CON, if the
+#' value in col matches pattern
+#' @param sampleTable table we want to subset
+#' @param col subset sampleTable based on value of col
+#' @param pattern regex of which samples are CON
+#' @return A copy of sampleTable with new column 'Condition' where the value is either ko or CON
+#' @keywords label
+#' @export
+#' @examples
+#' kwanlibr_label_con(smc3, "Condition", "ctrl")
 kwanlibr_label_con <- function(sampleTable, col, pattern) {
-  # Note: CON is purposefully all uppercase in order to ensure that it is before ko alphabetically
-  # Otherwise, fold changes will be flipped with controls being treated as ko.
-  # The levels argument specifies the order of the factors, but manipulations outside of this
-  # function may revert the table back to default ordering, hence the uppercasing of CON.
-  sampleTable$condition <- factor(ifelse(grepl(pattern, sampleTable[[col]]), "CON", "ko"),
-                                  levels = c("CON", "ko"))
+  # Note: CON is purposefully all uppercase in order to ensure that it is before
+  #  ko alphabetically.Otherwise, fold changes will be flipped with
+  #  controls being treated as ko.
+  # The levels argument specifies the order of the factors, but 
+  #   manipulations outside of this function may revert the table back to
+  #   default ordering, hence the uppercasing of CON.
+  sampleTable$condition <- factor(
+    ifelse(
+      grepl(pattern, sampleTable[[col]]),
+      "CON",
+      "ko"
+    ),
+    levels = c("CON", "ko")
+  )
   return(sampleTable)
 }
 
-kwanlibr_make_volcano <- function(lrt, figure_title, filename, figure_dir,
-                                  fdr = 0.01, xdiff = 5, ymax = 40,
-                                  intersect = NULL, intersect_only = "magenta",
-                                  label_genes = NULL) {
+
+#' Label samples as ko (knockout) or CON (control)
+#'
+#' kwanlibr_make_volcano(sampleTable, col, pattern) selects a subset of rows from 
+#' sampleTable where the value of col is in ... 
+#' @param lrt 1
+#' @param figure_title 1
+#' @param filename 1
+#' @param figure_dir 1
+#' @param fdr 1
+#' @param xdiff 1
+#' @param ymax 1
+#' @param intersect 1
+#' @param intersect_only 1
+#' @param label_genes 1
+#' @keywords label
+#' @export
+#' @examples
+#' kwanlibr_make_volcano(smc3, "Condition", "ctrl")
+kwanlibr_make_volcano <- function(
+  lrt,
+  figure_title,
+  filename,
+  figure_dir,
+  fdr=0.01,
+  xdiff=5,
+  ymax=40,
+  intersect=NULL,
+  intersect_only="magenta",
+  label_genes=NULL
+) {
   dir.create(figure_dir)
 
   # Desperately needs refactoring
@@ -124,36 +263,48 @@ kwanlibr_make_volcano <- function(lrt, figure_title, filename, figure_dir,
   up_DEGs <- volcano_df$logFC > 0
   
   if (intersect_only == FALSE) {
-    volcano_df$color <- ifelse(cko_DEGs,
-                               ifelse(up_DEGs, "red", "blue"),
-                               "gray50")
+    volcano_df$color <- ifelse(
+      cko_DEGs,
+      ifelse(up_DEGs, "red", "blue"),
+      "gray50"
+    )
   }
 
   if (!is.null(intersect)) {
     intersect_cko_DEGs <- (volcano_df$gene_name %in% intersect) & (cko_DEGs)
     
     if (intersect_only == FALSE) {
-      volcano_df$alpha <- ifelse(intersect_cko_DEGs,
-                                 1,
-                                 ifelse(cko_DEGs, deg_only_alpha, 0.1))
+      volcano_df$alpha <- ifelse(
+        intersect_cko_DEGs,
+        1,
+        ifelse(cko_DEGs, deg_only_alpha, 0.1)
+      )
     } else {
       volcano_df$color <- ifelse(intersect_cko_DEGs, intersect_only, "gray50")
       volcano_df$alpha <- ifelse(intersect_cko_DEGs, 1, 0.1)
     }
     
   } else {
-    volcano_df$color <- ifelse(cko_DEGs,
-                               ifelse(up_DEGs, "red", "blue"),
-                               "gray50")
+    volcano_df$color <- ifelse(
+      cko_DEGs,
+      ifelse(up_DEGs, "red", "blue"),
+      "gray50"
+    )
     volcano_df$alpha <- ifelse(cko_DEGs, 1, 0.1)
   }
   
-  
+
   # Create ceilings
-  volcano_df$logFC <- ifelse((volcano_df$logFC > xdiff) | (volcano_df$logFC < -xdiff),
-                             sign(volcano_df$logFC) * xdiff,
-                             volcano_df$logFC)
-  volcano_df$negLogPval <- ifelse(volcano_df$negLogPval > ymax, ymax, volcano_df$negLogPval)
+  volcano_df$logFC <- ifelse(
+    (volcano_df$logFC > xdiff) | (volcano_df$logFC < -xdiff),
+    sign(volcano_df$logFC) * xdiff,
+    volcano_df$logFC
+  )
+  volcano_df$negLogPval <- ifelse(
+    volcano_df$negLogPval > ymax,
+    ymax,
+    volcano_df$negLogPval
+  )
   
   # Plot significant points on top of insignificant points
   gray <- subset(volcano_df, color == "gray50")
@@ -175,9 +326,11 @@ kwanlibr_make_volcano <- function(lrt, figure_title, filename, figure_dir,
   if (!is.null(label_genes)) {
     label_df <- volcano_df[cko_DEGs | (volcano_df$gene_name %in% label_genes),]
     label_genes <- label_df$gene_name %in% label_genes
-    label_df$gene_name <- ifelse(label_genes,
-                                 paste0(label_df$gene_name),
-                                 "")
+    label_df$gene_name <- ifelse(
+      label_genes,
+      paste0(label_df$gene_name),
+      ""
+    )
     p <- p +
       geom_label_repel(
         data = label_df,
