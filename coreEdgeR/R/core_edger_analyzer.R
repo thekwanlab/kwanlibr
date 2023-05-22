@@ -121,7 +121,7 @@ kwanlibr_perform_edger <- function(
   }
   
   ## Perform analysis
-  dge <- readDGE(sampleTable)
+  dge <- edgeR::readDGE(sampleTable)
   ## remove last rows to avoid problems with edger as they are meta tags, not genes
   dge$counts <- head(dge$count, -5)
   ## Add in gene names to use later on
@@ -136,7 +136,7 @@ kwanlibr_perform_edger <- function(
   dge$genes <- merged_dge_genes[,IMPORTANT_TAGS]
   ## Remove variable to save on memory
   remove(merged_dge_genes)
-  dge <- calcNormFactors(dge)
+  dge <- edgeR::calcNormFactors(dge)
   if(class(batchCol) == "NULL"){
     design <- model.matrix(
       ~ droplevels(sampleTable[["condition"]])
@@ -146,14 +146,14 @@ kwanlibr_perform_edger <- function(
       ~ sampleTable[["condition"]] + sampleTable[["batch"]]
     )
   }
-  dge <- estimateDisp(dge, design)
-  fit <- glmFit(dge, design)
-  lrt <- glmLRT(fit, coef=2)
+  dge <- edgeR::estimateDisp(dge, design)
+  fit <- edgeR::glmFit(dge, design)
+  lrt <- edgeR::glmLRT(fit, coef=2)
   
-  print(summary(decideTests(lrt, p.value = 0.001)))
+  print(summary(limma::decideTests(lrt, p.value = 0.001)))
   
   if (class(saveName) != "NULL") {
-    final_table <- as.data.frame(topTags(lrt, n = nrow(dge$counts)))
+    final_table <- as.data.frame(edgeR::topTags(lrt, n = nrow(dge$counts)))
     dir.create(
       dirname(saveName),
       recursive = TRUE,
@@ -164,7 +164,7 @@ kwanlibr_perform_edger <- function(
       file=paste(saveName, ".csv", sep="")
     )
     write.csv(
-      topTags(lrt, n = 5000),
+      edgeR::topTags(lrt, n = 5000),
       file=paste(saveName, "_top5k.csv", sep="")
     ) 
   }
@@ -262,7 +262,7 @@ kwanlibr_make_volcano <- function(
   dir.create(figure_dir)
 
   # Desperately needs refactoring
-  volcano_df <- topTags(lrt, n = nrow(lrt$table))$table
+  volcano_df <- edgeR::topTags(lrt, n = nrow(lrt$table))$table
   volcano_df$negLogPval <- -log10(volcano_df$PValue)
   cko_DEGs <- volcano_df$FDR < fdr
   up_DEGs <- volcano_df$logFC > 0
@@ -315,18 +315,18 @@ kwanlibr_make_volcano <- function(
   gray <- subset(volcano_df, color == "gray50")
   notgray <- subset(volcano_df, color != "gray50")
   
-  p <- ggplot(volcano_df, aes(logFC, negLogPval)) +
-    geom_point(data=gray, col=gray$color, alpha=gray$alpha) +
-    geom_point(data=notgray, col=notgray$color, alpha=notgray$alpha) +
-    xlim(-xdiff, xdiff) +
-    ylim(0, ymax) +
-    ggtitle(bquote(italic(.(figure_title))~"cKO")) +
-    xlab(expression(log[2]*"FoldChange")) +
-    ylab(expression(-log[10]*"("*italic("P")*"-value)")) +
-    theme_minimal() +
-    theme(plot.title = element_text(hjust = 0.5, size = 45),
-          axis.title = element_text(size = 30),
-          axis.text = element_text(size=23))
+  p <- ggplot2::ggplot(volcano_df, aes(logFC, negLogPval)) +
+    ggplot2::geom_point(data=gray, col=gray$color, alpha=gray$alpha) +
+    ggplot2::geom_point(data=notgray, col=notgray$color, alpha=notgray$alpha) +
+    ggplot2::xlim(-xdiff, xdiff) +
+    ggplot2::ylim(0, ymax) +
+    ggplot2::ggtitle(bquote(italic(.(figure_title))~"cKO")) +
+    ggplot2::xlab(expression(log[2]*"FoldChange")) +
+    ggplot2::ylab(expression(-log[10]*"("*italic("P")*"-value)")) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 45),
+          axis.title = ggplot2::element_text(size = 30),
+          axis.text = ggplot2::element_text(size=23))
 
   if (!is.null(label_genes)) {
     label_df <- volcano_df[cko_DEGs | (volcano_df$gene_name %in% label_genes),]
@@ -337,7 +337,7 @@ kwanlibr_make_volcano <- function(
       ""
     )
     p <- p +
-      geom_label_repel(
+       ggplot2::geom_label_repel(
         data = label_df,
         aes(logFC, negLogPval, label = gene_name),
         max.overlaps = Inf,
@@ -349,16 +349,16 @@ kwanlibr_make_volcano <- function(
         fontface = "italic"
         # parse = TRUE,
       ) + 
-      geom_point(data=label_df[label_genes,], col="cyan")
+       ggplot2::geom_point(data=label_df[label_genes,], col="cyan")
   }
   
-  ggsave(
+  ggplot2::ggsave(
     paste0("volcano_", filename, ".pdf"),
     path = figure_dir,
     plot=p,
     width = 6, height = 6
   )
-  ggsave(
+   ggplot2::ggsave(
     filename = paste0("volcano_", filename, ".png"),
     path = figure_dir,
     plot=p,
@@ -402,7 +402,7 @@ kwanlibr_make_volcano_adg <- function(
   intersect=NULL,
   intersect_only="magenta"
 ) {
-  volcano_df <- topTags(lrt, n = nrow(lrt$table))$table
+  volcano_df <- edgeR::topTags(lrt, n = nrow(lrt$table))$table
   volcano_df$negLogPval <- -log10(volcano_df$PValue)
   cko_DEGs <- volcano_df$FDR < fdr
   up_DEGs <- volcano_df$logFC > 0
