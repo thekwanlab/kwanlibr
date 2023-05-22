@@ -8,7 +8,7 @@
 #---------
 # - create testing suite?
 # - changelog?
-# - create runable examples?
+# - create runable examples in documentation?
 #=============================================================================
 
 # install dependencies
@@ -73,12 +73,12 @@ kwanlibr_get_gtf <- function(
 #' sampleTable, fileCol, idCol, condCol, batchCol, filePrefix, gtf, saveName) 
 #' performs edger analysis on sampleTable
 #' @param sampleTable a dataframe with sample data
-#' @param fileCol header that refers to column names
+#' @param fileCol header that refers to file names
 #' @param idCol header that refers to the unique identifier of each sample
 #' @param condCol header that refers to the condition of each sample
 #' @param batchCol header that refers to the batch of the sample
 #' @param filePrefix prefix that the sample files start with. Default is NULL
-#' @param gtf reference genome
+#' @param gtf a dataframe of the reference genome
 #' @param saveName filename to save edger tables under
 #' @return A dataframe of the edger analysis
 #' @keywords edger
@@ -205,6 +205,7 @@ kwanlibr_subset <- function(sampleTable, col, ...) {
 #' @export
 #' @examples
 #' kwanlibr_label_con(smc3, "Condition", "ctrl")
+
 kwanlibr_label_con <- function(sampleTable, col, pattern) {
   # Note: CON is purposefully all uppercase in order to ensure that it is before
   #  ko alphabetically.Otherwise, fold changes will be flipped with
@@ -224,24 +225,28 @@ kwanlibr_label_con <- function(sampleTable, col, pattern) {
 }
 
 
-#' Label samples as ko (knockout) or CON (control)
+#' Create a volcano plot
 #'
-#' kwanlibr_make_volcano(sampleTable, col, pattern) selects a subset of rows from 
-#' sampleTable where the value of col is in ... 
-#' @param lrt 1
-#' @param figure_title 1
-#' @param filename 1
-#' @param figure_dir 1
-#' @param fdr 1
-#' @param xdiff 1
-#' @param ymax 1
-#' @param intersect 1
-#' @param intersect_only 1
-#' @param label_genes 1
-#' @keywords label
+#' kwanlibr_make_volcano(lrt, figure_title, filename, figure_dir, fdr, xdiff,
+#' ymax, intersect, intersect_only, label_genes) creates a volcano plot from the 
+#' data in lrt with title volcano_figure_title and saves it in a pdf and png 
+#' under the folder figure_dir 
+#' @param lrt a dataframe of the egdger data to plot
+#' @param figure_title name of the plot
+#' @param filename name the plot is saved under
+#' @param figure_dir directory to save the plots under
+#' @param fdr false discovery rate threshold. Default is 0.01
+#' @param xdiff difference in the x-axis. Default is 5
+#' @param ymax upper bound of y-axis. Default is 40
+#' @param intersect Default is NUMM
+#' @param intersect_only Default is "magenta"
+#' @param label_genes Default is NULL
+#' @keywords volcano plot
 #' @export
 #' @examples
-#' kwanlibr_make_volcano(smc3, "Condition", "ctrl")
+#' kwanlibr_make_volcano(smc3, figure_title="Smc3", filename="edger_smc3",
+#' figure_dir=figure_dir)
+
 kwanlibr_make_volcano <- function(
   lrt,
   figure_title,
@@ -364,37 +369,61 @@ kwanlibr_make_volcano <- function(
 }
 
 
-
-
-
-
-
-
-
+#' Old volcano plot
+#'
+#' kwanlibr_make_volcano_adg(lrt, figure_title, filename, figure_dir, fdr, xdiff,
+#' ymax, intersect, intersect_only) creates a volcano plot from the 
+#' data in lrt with title volcano_figure_title and saves it in a pdf and png 
+#' under the folder figure_dir. THIS PLOT HAS OLD POINT SIZE BEHAVIOUR.
+#' @param lrt a dataframe of the egdger data to plot
+#' @param figure_title name of the plot
+#' @param filename name the plot is saved under
+#' @param figure_dir directory to save the plots under
+#' @param fdr false discovery rate threshold. Default is 0.01
+#' @param xdiff difference in the x-axis. Default is 5
+#' @param ymax upper bound of y-axis. Default is 40
+#' @param intersect Default is NUMM
+#' @param intersect_only Default is "magenta"
+#' @keywords volcano plot
+#' @export
+#' @examples
+#' kwanlibr_make_volcano_adg(smc3, figure_title="Smc3", filename="edger_smc3",
+#' figure_dir=figure_dir)
 
 # Delete this to restore old point size behavior
-kwanlibr_make_volcano_adg <- function(lrt, figure_title, filename, figure_dir,
-                                  fdr = 0.01, xdiff = 5, ymax = 40,
-                                  intersect = NULL, intersect_only = "magenta") {
+kwanlibr_make_volcano_adg <- function(
+  lrt,
+  figure_title,
+  filename,
+  figure_dir,
+  fdr=0.01,
+  xdiff=5,
+  ymax=40,
+  intersect=NULL,
+  intersect_only="magenta"
+) {
   volcano_df <- topTags(lrt, n = nrow(lrt$table))$table
   volcano_df$negLogPval <- -log10(volcano_df$PValue)
   cko_DEGs <- volcano_df$FDR < fdr
   up_DEGs <- volcano_df$logFC > 0
   
   if (intersect_only == FALSE) {
-    volcano_df$color <- ifelse(cko_DEGs,
-                               ifelse(up_DEGs, "red", "blue"),
-                               "gray50")
+    volcano_df$color <- ifelse(
+      cko_DEGs,
+      ifelse(up_DEGs, "red", "blue"),
+      "gray50"
+    )
   }
-  
   
   if (!is.null(intersect)) {
     intersect_cko_DEGs <- (volcano_df$gene_name %in% intersect) & (cko_DEGs)
     
     if (intersect_only == FALSE) {
-      volcano_df$alpha <- ifelse(intersect_cko_DEGs,
-                                 1,
-                                 ifelse(cko_DEGs, deg_only_alpha, 0.1))
+      volcano_df$alpha <- ifelse(
+        intersect_cko_DEGs,
+        1,
+        ifelse(cko_DEGs, deg_only_alpha, 0.1)
+      )
     } else {
       volcano_df$color <- ifelse(intersect_cko_DEGs, intersect_only, "gray50")
       volcano_df$alpha <- ifelse(intersect_cko_DEGs, 1, 0.1)
@@ -404,12 +433,17 @@ kwanlibr_make_volcano_adg <- function(lrt, figure_title, filename, figure_dir,
     volcano_df$alpha <- ifelse(cko_DEGs, 1, 0.1)
   }
   
-  
   # Create ceiling
-  volcano_df$logFC <- ifelse((volcano_df$logFC > xdiff) | (volcano_df$logFC < -xdiff),
-                             sign(volcano_df$logFC) * xdiff,
-                             volcano_df$logFC)
-  volcano_df$negLogPval <- ifelse(volcano_df$negLogPval > ymax, ymax, volcano_df$negLogPval)
+  volcano_df$logFC <- ifelse(
+    (volcano_df$logFC > xdiff) | (volcano_df$logFC < -xdiff),
+    sign(volcano_df$logFC) * xdiff,
+    volcano_df$logFC
+  )
+  volcano_df$negLogPval <- ifelse(
+    volcano_df$negLogPval > ymax,
+    ymax,
+    volcano_df$negLogPval
+  )
   
   gray <- subset(volcano_df, color == "gray50")
   notgray <- subset(volcano_df, color != "gray50")
@@ -447,6 +481,8 @@ kwanlibr_make_volcano_adg <- function(lrt, figure_title, filename, figure_dir,
   return(p)
 }
 
+
+#test function for documentation generation
 
 #' A Cat Function
 #'
