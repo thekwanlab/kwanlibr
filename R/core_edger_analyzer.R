@@ -1,5 +1,5 @@
 #=============================================================================
-# coreEdgeR is a package that contains wrapper functions
+# kwanlibr is a package that contains wrapper functions
 # for edgeR functions.
 # They were originally for [...]
 
@@ -36,7 +36,7 @@ IMPORTANT_TAGS <- c("gene_id", "gene_type", "gene_name")
 
 #' Get reference
 #'
-#' kwanlibr_get_gtf(gtf, verbose) returns the reference specified by
+#' get_gtf(gtf, verbose) returns the reference specified by
 #' the path gtf. 
 #' @param gtf absolute path to the reference
 #' @param verbose set to TRUE to print number of rows. Default is FALSE
@@ -44,9 +44,9 @@ IMPORTANT_TAGS <- c("gene_id", "gene_type", "gene_name")
 #' @keywords reference
 #' @export
 #' @examples
-#' kwanlibr_get_gtf(gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.ERCC.annotation.gtf')
+#' get_gtf(gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.ERCC.annotation.gtf')
 
-kwanlibr_get_gtf <- function(
+get_gtf <- function(
   gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.annotation.gtf',
   verbose=FALSE
 ) {
@@ -69,7 +69,7 @@ kwanlibr_get_gtf <- function(
 
 #' Perform edgeR
 #'
-#' kwanlibr_perform_edger(
+#' perform_edger(
 #' sampleTable, fileCol, idCol, condCol, batchCol, filePrefix, gtf, saveName) 
 #' performs edger analysis on sampleTable
 #' @param sampleTable a dataframe with sample data
@@ -84,9 +84,9 @@ kwanlibr_get_gtf <- function(
 #' @keywords edger
 #' @export
 #' @examples
-#' kwanlibr_perform_edger(smc3, idCol="Pool.Name", gtf=gtf, saveName="tables/Smc3EdgeR")
+#' perform_edger(smc3, idCol="Pool.Name", gtf=gtf, saveName="tables/Smc3EdgeR")
 
-kwanlibr_perform_edger <- function(
+perform_edger <- function(
   sampleTable,
   fileCol="Filename", 
   idCol="Sample", 
@@ -101,7 +101,7 @@ kwanlibr_perform_edger <- function(
   filePrefix <- gsub("/+$", "", filePrefix)
   
   if (class(gtf) == "NULL") {
-    gtf <- kwanlibr_get_gtf()
+    gtf <- get_gtf()
   }
     
   if(class(batchCol) == "NULL"){
@@ -175,7 +175,7 @@ kwanlibr_perform_edger <- function(
 
 #' Get a subset of table rows
 #'
-#' kwanlibr_subset(sampleTable, col, ...) selects a subset of rows from 
+#' subset(sampleTable, col, ...) selects a subset of rows from 
 #' sampleTable where the value of col is in ... 
 #' @param sampleTable table we want to subset
 #' @param col subset sampleTable based on value of col
@@ -183,9 +183,9 @@ kwanlibr_perform_edger <- function(
 #' @keywords subset
 #' @export
 #' @examples
-#' kwanlibr_subset(smc3, "Pool.Name", "Smc")
+#' subset(smc3, "Pool.Name", "Smc")
 
-kwanlibr_subset <- function(sampleTable, col, ...) {
+subset <- function(sampleTable, col, ...) {
   return(
     sampleTable[grepl(paste(c(...), collapse="|"),
     sampleTable[[col]], perl=TRUE),]
@@ -195,7 +195,7 @@ kwanlibr_subset <- function(sampleTable, col, ...) {
 
 #' Label samples as ko (knockout) or CON (control)
 #'
-#' kwanlibr_label_con(sampleTable, col, pattern) labels a sample CON, if the
+#' label_con(sampleTable, col, pattern) labels a sample CON, if the
 #' value in col matches pattern
 #' @param sampleTable table we want to subset
 #' @param col subset sampleTable based on value of col
@@ -204,9 +204,9 @@ kwanlibr_subset <- function(sampleTable, col, ...) {
 #' @keywords label
 #' @export
 #' @examples
-#' kwanlibr_label_con(smc3, "Condition", "ctrl")
+#' label_con(smc3, "Condition", "ctrl")
 
-kwanlibr_label_con <- function(sampleTable, col, pattern) {
+label_con <- function(sampleTable, col, pattern) {
   # Note: CON is purposefully all uppercase in order to ensure that it is before
   #  ko alphabetically.Otherwise, fold changes will be flipped with
   #  controls being treated as ko.
@@ -227,7 +227,7 @@ kwanlibr_label_con <- function(sampleTable, col, pattern) {
 
 #' Create a volcano plot
 #'
-#' kwanlibr_make_volcano(lrt, figure_title, filename, figure_dir, fdr, xdiff,
+#' make_volcano(lrt, figure_title, filename, figure_dir, fdr, xdiff,
 #' ymax, intersect, intersect_only, label_genes) creates a volcano plot from the 
 #' data in lrt with title volcano_figure_title and saves it in a pdf and png 
 #' under the folder figure_dir 
@@ -244,10 +244,10 @@ kwanlibr_label_con <- function(sampleTable, col, pattern) {
 #' @keywords volcano plot
 #' @export
 #' @examples
-#' kwanlibr_make_volcano(smc3, figure_title="Smc3", filename="edger_smc3",
+#' make_volcano(smc3, figure_title="Smc3", filename="edger_smc3",
 #' figure_dir=figure_dir)
 
-kwanlibr_make_volcano <- function(
+make_volcano <- function(
   lrt,
   figure_title,
   filename,
@@ -364,14 +364,14 @@ kwanlibr_make_volcano <- function(
     plot=p,
     width = 6, height = 6
   )
-  
+  print("########################################")
   return(p)
 }
 
 
 #' Old volcano plot
 #'
-#' kwanlibr_make_volcano_adg(lrt, figure_title, filename, figure_dir, fdr, xdiff,
+#' make_volcano_adg(lrt, figure_title, filename, figure_dir, fdr, xdiff,
 #' ymax, intersect, intersect_only) creates a volcano plot from the 
 #' data in lrt with title volcano_figure_title and saves it in a pdf and png 
 #' under the folder figure_dir. THIS PLOT HAS OLD POINT SIZE BEHAVIOUR.
@@ -387,11 +387,11 @@ kwanlibr_make_volcano <- function(
 #' @keywords volcano plot
 #' @export
 #' @examples
-#' kwanlibr_make_volcano_adg(smc3, figure_title="Smc3", filename="edger_smc3",
+#' make_volcano_adg(smc3, figure_title="Smc3", filename="edger_smc3",
 #' figure_dir=figure_dir)
 
 # Delete this to restore old point size behavior
-kwanlibr_make_volcano_adg <- function(
+make_volcano_adg <- function(
   lrt,
   figure_title,
   filename,
@@ -445,8 +445,8 @@ kwanlibr_make_volcano_adg <- function(
     volcano_df$negLogPval
   )
   
-  gray <- subset(volcano_df, color == "gray50")
-  notgray <- subset(volcano_df, color != "gray50")
+  gray <- kwanlibr::subset(volcano_df, color == "gray50")
+  notgray <- kwanlibr::subset(volcano_df, color != "gray50")
   
   p <- ggplot(volcano_df, aes(logFC, negLogPval)) +
     geom_point(data=gray, col=gray$color, alpha=gray$alpha) +
