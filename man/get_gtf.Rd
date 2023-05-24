@@ -11,12 +11,14 @@ get_gtf(
 )
 }
 \arguments{
-\item{gtf}{Absolute path to the reference. Default is the GENCODE annotation for mm10/GRCm38}
+\item{gtf}{Absolute path to the reference. Default is the GENCODE annotation
+for mm10/GRCm38}
 
-\item{verbose}{Set to TRUE to print number of genes in the reference. Default is FALSE}
+\item{verbose}{Set to TRUE to print number of genes in the reference}
 }
 \value{
-A dataframe of gene annotations with 3 columns: the ensembl \code{gene_id}, the \code{gene_type}, and \code{gene_name} (gene symbol)
+A dataframe of gene annotations with 3 columns: the ensembl
+\code{gene_id}, the \code{gene_type}, and \code{gene_name} (gene symbol)
 }
 \description{
 get_gtf(gtf, verbose) returns the reference specified by
