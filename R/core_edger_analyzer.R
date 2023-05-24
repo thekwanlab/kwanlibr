@@ -1,7 +1,6 @@
 #=============================================================================
-# coreEdgeR is a package that contains wrapper functions
+# kwanlibr is a package that contains wrapper functions
 # for edgeR functions.
-# They were originally for [...]
 
 #---------
 # TO-DO
@@ -36,16 +35,16 @@ IMPORTANT_TAGS <- c("gene_id", "gene_type", "gene_name")
 
 #' Get reference
 #'
-#' kwanlibr_get_gtf(gtf, verbose) returns the reference specified by
+#' get_gtf(gtf, verbose) returns the reference specified by
 #' the path gtf. 
-#' @param gtf absolute path to the reference. Default is the GENCODE annotation for mm10/GRCm38
-#' @param verbose set to TRUE to print number of genes in the reference. Default is FALSE
+#' @param gtf Absolute path to the reference. Default is the GENCODE annotation for mm10/GRCm38
+#' @param verbose Set to TRUE to print number of genes in the reference. Default is FALSE
 #' @return A dataframe of gene annotations with 3 columns: the ensembl `gene_id`, the `gene_type`, and `gene_name` (gene symbol)
 #' @export
 #' @examples
-#' kwanlibr_get_gtf(gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.ERCC.annotation.gtf')
+#' get_gtf(gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.ERCC.annotation.gtf')
 
-kwanlibr_get_gtf <- function(
+get_gtf <- function(
   gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.annotation.gtf',
   verbose=FALSE
 ) {
@@ -68,7 +67,7 @@ kwanlibr_get_gtf <- function(
 
 #' Perform edgeR
 #'
-#' kwanlibr_perform_edger(
+#' perform_edger(
 #' sampleTable, fileCol, idCol, condCol, batchCol, filePrefix, gtf, saveName) 
 #' performs edgeR analysis on a dataframe of samples. Typically run after get_gtf, subset_samples, and label_control_samples
 #' @param sampleTable a dataframe with sample data
@@ -82,9 +81,9 @@ kwanlibr_get_gtf <- function(
 #' @return A dataframe of the edger analysis
 #' @export
 #' @examples
-#' kwanlibr_perform_edger(smc3, idCol="Pool.Name", gtf=gtf, saveName="tables/p21_smc3_edger")
+#' perform_edger(smc3, idCol="Pool.Name", gtf=gtf, saveName="tables/p21_smc3_edger")
 
-kwanlibr_perform_edger <- function(
+perform_edger <- function(
   sampleTable,
   fileCol="Filename", 
   idCol="Sample", 
@@ -99,7 +98,7 @@ kwanlibr_perform_edger <- function(
   filePrefix <- gsub("/+$", "", filePrefix)
   
   if (class(gtf) == "NULL") {
-    gtf <- kwanlibr_get_gtf()
+    gtf <- kwanlibr::get_gtf()
   }
     
   if(class(batchCol) == "NULL"){
@@ -173,17 +172,18 @@ kwanlibr_perform_edger <- function(
 
 #' Get a subset of table rows
 #'
-#' kwanlibr_subset(sampleTable, col, ...) selects a subset of rows from 
+#' subset_table(sampleTable, col, ...) selects a subset of rows from 
 #' sampleTable where the value of col is in ... 
 #' @param sampleTable table we want to subset
 #' @param col column to search
-#' @param ... All other arguments are strings or regex that are selected for in the column. The result is the union of these searches
+#' @param ... All other arguments are strings or regex that are selected for in
+#' the column. The result is the union of these searches
 #' @return A dataframe with the subset of selected rows
 #' @export
 #' @examples
-#' kwanlibr_subset(samples, "Pool.Name", "Smc", "p21") # Selects only rows with "Smc" or "p21" in the Pool.name column
+#' subset_table(samples, "Pool.Name", "Smc", "p21") # Selects only rows with "Smc" or "p21" in the Pool.name column
 
-kwanlibr_subset <- function(sampleTable, col, ...) {
+subset_table <- function(sampleTable, col, ...) {
   return(
     sampleTable[grepl(paste(c(...), collapse="|"),
     sampleTable[[col]], perl=TRUE),]
@@ -193,7 +193,7 @@ kwanlibr_subset <- function(sampleTable, col, ...) {
 
 #' Adds a condition column which labels samples as knockout or control
 #'
-#' kwanlibr_label_con(sampleTable, col, pattern) labels a sample as a control if the
+#' label_con(sampleTable, col, pattern) labels a sample as a control if the
 #' value in col matches pattern
 #' @param sampleTable table we want to annotate
 #' @param col column to search
@@ -201,9 +201,9 @@ kwanlibr_subset <- function(sampleTable, col, ...) {
 #' @return A copy of sampleTable with the new column `condition` where the value is either ko or CON
 #' @export
 #' @examples
-#' kwanlibr_label_con(smc3, "Condition", "ctrl")
+#' label_con(smc3, "Condition", "ctrl")
 
-kwanlibr_label_con <- function(sampleTable, col, pattern) {
+label_con <- function(sampleTable, col, pattern) {
   # Note: CON is purposefully all uppercase in order to ensure that it is before
   #  ko alphabetically.Otherwise, fold changes will be flipped with
   #  controls being treated as ko.
@@ -224,7 +224,7 @@ kwanlibr_label_con <- function(sampleTable, col, pattern) {
 
 #' Create a volcano plot
 #'
-#' kwanlibr_make_volcano(lrt, figure_title, filename, figure_dir, fdr, xdiff,
+#' make_volcano(lrt, figure_title, filename, figure_dir, fdr, xdiff,
 #' ymax, intersect, intersect_color, label_genes) creates a volcano plot from the
 #' data in lrt with title volcano_figure_title and saves it in a pdf and png 
 #' under the folder figure_dir 
@@ -239,10 +239,10 @@ kwanlibr_label_con <- function(sampleTable, col, pattern) {
 #' @keywords volcano plot
 #' @export
 #' @examples
-#' kwanlibr_make_volcano(smc3, figure_title="Smc3", filename="edger_smc3",
+#' make_volcano(smc3, figure_title="Smc3", filename="edger_smc3",
 #' figure_dir=figure_dir)
 
-kwanlibr_make_volcano <- function(
+make_volcano <- function(
   lrt,
   figure_title,
   filename,
