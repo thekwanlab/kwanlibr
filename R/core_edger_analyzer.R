@@ -11,19 +11,12 @@
 #=============================================================================
 
 # install dependencies
-if (length(find.package("librarian", quiet=TRUE)) == 0) {
-  install.packages("librarian")
-}
 
-librarian::shelf(
-  edgeR,
-  rtracklayer,
-  org.Mm.eg.db,
-  data.table,
-  ggrepel,
-  quiet=FALSE,
-  ask=FALSE
-)
+#' @import edgeR
+#' @import rtracklayer
+#' @import org.Mm.eg.db
+#' @import data.table
+#' @import ggrepel
 
 #constants
 IMPORTANT_TAGS <- c("gene_id", "gene_type", "gene_name")
@@ -293,7 +286,7 @@ make_volcano <- function(
   gray <- subset(volcano_df, color == "gray50")
   notgray <- subset(volcano_df, color != "gray50")
   
-  p <- ggplot2::ggplot(volcano_df, aes(logFC, negLogPval)) +
+  p <- ggplot2::ggplot(volcano_df, ggplot2::aes(logFC, negLogPval)) +
     ggplot2::geom_point(data=gray, col=gray$color, alpha=gray$alpha) +
     ggplot2::geom_point(data=notgray, col=notgray$color, alpha=notgray$alpha) +
     ggplot2::xlim(-xdiff, xdiff) +
@@ -317,7 +310,7 @@ make_volcano <- function(
     p <- p +
        ggplot2::geom_label_repel(
         data = label_df,
-        aes(logFC, negLogPval, label = gene_name),
+        ggplot2::aes(logFC, negLogPval, label = gene_name),
         max.overlaps = Inf,
         box.padding = 0.5,
         # force = 4,

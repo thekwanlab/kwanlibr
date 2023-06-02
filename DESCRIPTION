@@ -1,6 +1,6 @@
 Package: kwanlibr
 Title:  edgeR wrapper for simple differential expression analysis
-Version: 0.0.0.9000
+Version: 1.0
 Authors@R: 
     c(
         person("Yaman", "Qalieh", , "yamanq@umich.edu", role = c("aut", "cre"),
@@ -12,8 +12,12 @@ Description: This package provides a set of helpers to perform a simple
     differential analysis and plot the results, where the input is a sample
     table. For details on how to use this library, see the documentation in
     the Bioinformatics folder.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Imports:
+    ggplot2,
+    rtracklayer,
+    data.table,
+    ggrepel

@@ -24,14 +24,14 @@ make_volcano(
 
 \item{figure_dir}{Directory to save the plots under}
 
-\item{fdr}{False discovery rate threshold. genes > fdr are colored}
+\item{fdr}{False discovery rate threshold. Genes > fdr are colored}
 
-\item{xdiff}{x-axis ceiling in both directions, For example, xdiff=5 sets the
+\item{xdiff}{x-axis ceiling in both directions. For example, xdiff=5 sets the
 x axis to -5 to 5}
 
 \item{ymax}{y-axis ceiling}
 
-\item{label_genes}{List of genes to label on the volcano plot.}
+\item{label_genes}{List of genes to label on the volcano plot}
 }
 \description{
 make_volcano(lrt, figure_title, filename, figure_dir, fdr, xdiff,
