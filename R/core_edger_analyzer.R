@@ -12,6 +12,7 @@
 
 # install dependencies
 
+#edgeR dependencies
 #' @import edgeR
 #' @import rtracklayer
 #' @import org.Mm.eg.db
