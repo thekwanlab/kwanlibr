@@ -309,7 +309,7 @@ make_volcano <- function(
       ""
     )
     p <- p +
-       ggplot2::geom_label_repel(
+       ggrepel::geom_label_repel(
         data = label_df,
         ggplot2::aes(logFC, negLogPval, label = gene_name),
         max.overlaps = Inf,
