@@ -89,7 +89,8 @@ perform_edger <- function(
   idCol="Sample", 
   condCol="condition",
   batchCol=NULL,
-  filePrefix=NULL, gtf=NULL,
+  filePrefix=NULL, 
+  gtf=NULL,
   saveName=NULL
 ) {
   if (class(filePrefix) == "NULL") {
