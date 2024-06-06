@@ -33,15 +33,15 @@ ggsave_vector_raster <- function(
 ) {
   
   ggplot2::ggsave(
-    filename = filename,
+    filename = paste0(filename, '.', vector_device),
     device = vector_device,
     width = width,
     height = height,
     ...
   )
   ggplot2::ggsave(
-    filename = filename,
-     device = vector_device,
+    filename = paste0(filename, '.', raster_device),
+     device = raster_device,
      width = width,
      height = height,
      ...

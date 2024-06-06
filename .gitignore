@@ -1,2 +1,4 @@
 .Rproj.user
 plots/*
+informal_tests/test_suite_config.yaml
+informal_tests/test_results/
