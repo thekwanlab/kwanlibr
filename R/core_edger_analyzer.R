@@ -297,9 +297,9 @@ make_volcano <- function(
     ggplot2::xlab(expression(log[2]*"FoldChange")) +
     ggplot2::ylab(expression(-log[10]*"("*italic("P")*"-value)")) +
     ggplot2::theme_minimal() +
-    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 45),
-          axis.title = ggplot2::element_text(size = 30),
-          axis.text = ggplot2::element_text(size=23))
+    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 21),
+          axis.title = ggplot2::element_text(size = 15),
+          axis.text = ggplot2::element_text(size=12))
 
   if (!is.null(label_genes)) {
     label_df <- volcano_df[cko_DEGs | (volcano_df$gene_name %in% label_genes),]
@@ -316,7 +316,7 @@ make_volcano <- function(
         max.overlaps = Inf,
         box.padding = 0.5,
         # force = 4,
-        size = 5,
+        size = 4,
         min.segment.length = 0,
         fill = "white",
         fontface = "italic"
