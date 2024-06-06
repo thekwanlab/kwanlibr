@@ -49,5 +49,4 @@ kwanlibr::make_volcano(
   figure_title="Gene X cKO vs Control",
   filename = 'test_make_volcano',
   figure_dir = config$paths$test_results_dump,
-  
 )
