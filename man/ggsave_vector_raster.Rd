@@ -39,7 +39,12 @@ save the most recently displayed figure to both a raster (default PNG) and
 vector (default PDF) format in the same location
 }
 \examples{
+saved_plot = ggplot2::ggplot(mtcars, aes(cyl, mpg)) + ggplot2::geom_point()
+saved_plot
+
 ggsave_vector_raster('figure_1A')
 ggsave_vector_raster('figure_2A', width=8, height=6, vector_device='svg', raster_device='jpeg')
 
+# Pass extra arguments to ggsave() through ...
+ggsave_vector_raster('figure_1A', plot=saved_plot) 
 }
