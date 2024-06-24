@@ -52,3 +52,27 @@ ggsave_vector_raster <- function(
      ...
   )
 }
+
+#' clamp
+#' 
+#' Bound a value or array of values
+#' 
+#' @param x Value or array of values to clamp
+#' @param lower lower bound of the clamp
+#' @param upper upper bound of the clamp
+#' 
+#' @export
+#' 
+#' @examples
+#' clamp(1:5) # returns c(1,2,3,4,5)
+#' clamp(1:5, lower=3) # returns c(3,3,3,4,5)
+clamp <- function(
+  x,
+  lower = -Inf,
+  upper = Inf
+) {
+  if (lower > upper) stop("Lower bound cannot be greater than upper bound")
+  ifelse(x > upper, 
+         upper,
+         ifelse(x < lower, lower, x))
+}
