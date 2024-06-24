@@ -20,9 +20,14 @@
 #' @export
 #' 
 #' @examples
+#' saved_plot = ggplot2::ggplot(mtcars, aes(cyl, mpg)) + ggplot2::geom_point()
+#' saved_plot
+#' 
 #' ggsave_vector_raster('figure_1A')
 #' ggsave_vector_raster('figure_2A', width=8, height=6, vector_device='svg', raster_device='jpeg')
 #' 
+#' # Pass extra arguments to ggsave() through ...
+#' ggsave_vector_raster('figure_1A', plot=saved_plot) 
 ggsave_vector_raster <- function(
   filename, 
   width = NA, 
@@ -46,4 +51,31 @@ ggsave_vector_raster <- function(
      height = height,
      ...
   )
+}
+
+#' clamp
+#' 
+#' Bound a value or array of values
+#' 
+#' @param x Value or array of values to clamp
+#' @param lower lower bound of the clamp
+#' @param upper upper bound of the clamp
+#' 
+#' @export
+#' 
+#' @examples
+#' clamp(1:5) # returns c(1,2,3,4,5)
+#' clamp(1:5, lower=3) # returns c(3,3,3,4,5)
+clamp <- function(
+  x,
+  lower = -Inf,
+  upper = Inf
+) {
+  if (lower > upper) stop(paste("Lower bound", 
+                                lower, 
+                                "cannot be greater than upper bound", 
+                                upper))
+  ifelse(x > upper, 
+         upper,
+         ifelse(x < lower, lower, x))
 }

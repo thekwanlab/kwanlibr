@@ -119,7 +119,7 @@ perform_edger <- function(
   }
   
   ## Perform analysis
-  dge <- edgeR::readDGE(sampleTable)
+  dge <- edgeR::readDGE(sampleTable, header=FALSE)
   ## remove last rows to avoid problems with edgeR as they are meta tags, not genes
   dge$counts <- head(dge$count, -5)
   ## Add in gene names to use later on
@@ -241,6 +241,7 @@ label_control_samples <- function(sampleTable, col, pattern) {
 #' @param ymax y-axis ceiling
 #' @param label_genes List of genes to label on the volcano plot
 #' @keywords volcano plot
+#' @import ggplot2
 #' @export
 #' @examples
 #' make_volcano(smc3, figure_title="Smc3 cKO", filename="edger_smc3",
@@ -261,82 +262,57 @@ make_volcano <- function(
   # Desperately needs refactoring
   volcano_df <- edgeR::topTags(lrt, n = nrow(lrt$table))$table
   volcano_df$negLogPval <- -log10(volcano_df$PValue)
-  cko_DEGs <- volcano_df$FDR < fdr
-  up_DEGs <- volcano_df$logFC > 0
-  
-  volcano_df$color <- ifelse(
-    cko_DEGs,
-    ifelse(up_DEGs, "red", "blue"),
-    "gray50"
-  )
-  volcano_df$alpha <- ifelse(cko_DEGs, 1, 0.1)
-
 
   # Create ceilings
-  volcano_df$logFC <- ifelse(
-    (volcano_df$logFC > xdiff) | (volcano_df$logFC < -xdiff),
-    sign(volcano_df$logFC) * xdiff,
-    volcano_df$logFC
-  )
-  volcano_df$negLogPval <- ifelse(
-    volcano_df$negLogPval > ymax,
-    ymax,
-    volcano_df$negLogPval
-  )
+  volcano_df$logFC <- kwanlibr::clamp(volcano_df$logFC, 
+                                      lower = -xdiff, 
+                                      upper = xdiff)
+  volcano_df$negLogPval <- kwanlibr::clamp(volcano_df$negLogPval,
+                                           lower = 0,
+                                           upper = ymax)
   
   # Plot significant points on top of insignificant points
-  gray <- subset(volcano_df, color == "gray50")
-  notgray <- subset(volcano_df, color != "gray50")
+  insig.points <- subset(volcano_df, FDR > fdr)
+  sig.down.points <- subset(volcano_df, FDR <= fdr & logFC < 0)
+  sig.up.points <- subset(volcano_df, FDR <= fdr & logFC > 0)
   
-  p <- ggplot2::ggplot(volcano_df, ggplot2::aes(logFC, negLogPval)) +
-    ggplot2::geom_point(data=gray, col=gray$color, alpha=gray$alpha) +
-    ggplot2::geom_point(data=notgray, col=notgray$color, alpha=notgray$alpha) +
-    ggplot2::xlim(-xdiff, xdiff) +
-    ggplot2::ylim(0, ymax) +
-    ggplot2::ggtitle(figure_title) +
-    ggplot2::xlab(expression(log[2]*"FoldChange")) +
-    ggplot2::ylab(expression(-log[10]*"("*italic("P")*"-value)")) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 21),
-          axis.title = ggplot2::element_text(size = 15),
-          axis.text = ggplot2::element_text(size=12))
+  p <- ggplot(insig.points, aes(logFC, negLogPval)) +
+    geom_point(col = 'grey', alpha = 0.1) +
+    geom_point(data = sig.down.points, col = 'blue') +
+    geom_point(data = sig.up.points, col = 'red') +
+    xlim(-xdiff, xdiff) +
+    ylim(0, ymax) +
+    ggtitle(figure_title) +
+    xlab(expression(log[2]*"FoldChange")) +
+    ylab(expression(-log[10]*"("*italic("P")*"-value)")) +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, size = 21),
+          axis.title = element_text(size = 15),
+          axis.text = element_text(size=12))
 
   if (!is.null(label_genes)) {
-    label_df <- volcano_df[cko_DEGs | (volcano_df$gene_name %in% label_genes),]
-    label_genes <- label_df$gene_name %in% label_genes
-    label_df$gene_name <- ifelse(
-      label_genes,
-      paste0(label_df$gene_name),
-      ""
-    )
+    label_df <- volcano_df[volcano_df$gene_name %in% label_genes,]
     p <- p +
-       ggrepel::geom_label_repel(
-        data = label_df,
-        ggplot2::aes(logFC, negLogPval, label = gene_name),
-        max.overlaps = Inf,
-        box.padding = 0.5,
-        # force = 4,
-        size = 4,
-        min.segment.length = 0,
-        fill = "white",
-        fontface = "italic"
-        # parse = TRUE,
-      ) + 
-       ggplot2::geom_point(data=label_df[label_genes,], col="cyan")
+    ggrepel::geom_label_repel(
+      data = label_df,
+      aes(logFC, negLogPval, label = gene_name),
+      max.overlaps = Inf,
+      box.padding = 0.5,
+      # force = 4,
+      size = 4,
+      min.segment.length = 0,
+      fill = "white",
+      fontface = "italic"
+      # parse = TRUE,
+    ) + 
+    geom_point(data=label_df, col="cyan")
   }
-  
-  ggplot2::ggsave(
-    paste0("volcano_", filename, ".pdf"),
-    path = figure_dir,
-    plot=p,
-    width = 6, height = 6
-  )
-   ggplot2::ggsave(
-    filename = paste0("volcano_", filename, ".png"),
-    path = figure_dir,
-    plot=p,
-    width = 6, height = 6
-  )
+
+   kwanlibr::ggsave_vector_raster(
+     filename = file.path(figure_dir, paste0('volcano_', filename)),
+     width = 6, height = 6,
+     plot = p
+   )
   
   return(p)
 }

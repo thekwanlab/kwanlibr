@@ -18,3 +18,13 @@ p_hist
 ggsave_vector_raster(file.path(config$paths$test_results_dump,
                                'test_from_display_ggsave_vector_raster'),
                      width=8, height=2)
+
+# =========================
+# test clamp
+# =========================
+
+x = 1:20
+clamp(x)
+clamp(x, lower=4, upper=15)
+clamp(x, lower=10, upper=10)
+clamp(x, lower=10, upper=2) # throw error

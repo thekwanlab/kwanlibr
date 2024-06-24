@@ -50,3 +50,10 @@ kwanlibr::make_volcano(
   filename = 'test_make_volcano',
   figure_dir = config$paths$test_results_dump,
 )
+kwanlibr::make_volcano(
+  lrt = lrt,
+  figure_title="Gene X cKO vs Control",
+  filename = 'test_make_volcano_labels',
+  figure_dir = config$paths$test_results_dump,
+  label_genes = c('Foxp1', 'Neurod6', 'Rora')
+)
