@@ -71,7 +71,10 @@ clamp <- function(
   lower = -Inf,
   upper = Inf
 ) {
-  if (lower > upper) stop("Lower bound cannot be greater than upper bound")
+  if (lower > upper) stop(paste("Lower bound", 
+                                lower, 
+                                "cannot be greater than upper bound", 
+                                upper))
   ifelse(x > upper, 
          upper,
          ifelse(x < lower, lower, x))
