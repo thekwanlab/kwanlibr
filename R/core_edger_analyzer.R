@@ -119,7 +119,7 @@ perform_edger <- function(
   }
   
   ## Perform analysis
-  dge <- edgeR::readDGE(sampleTable)
+  dge <- edgeR::readDGE(sampleTable, header=FALSE)
   ## remove last rows to avoid problems with edgeR as they are meta tags, not genes
   dge$counts <- head(dge$count, -5)
   ## Add in gene names to use later on
