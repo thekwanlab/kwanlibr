@@ -278,8 +278,8 @@ make_volcano <- function(
   
   p <- ggplot(insig.points, aes(logFC, negLogPval)) +
     geom_point(col = 'grey', alpha = 0.1) +
-    geom_point(data = sig.down.points, col = 'blue') +
-    geom_point(data = sig.up.points, col = 'red') +
+    geom_point(data = sig.down.points, col = '#1a52f9') +
+    geom_point(data = sig.up.points, col = '#d80303') +
     xlim(-xdiff, xdiff) +
     ylim(0, ymax) +
     ggtitle(figure_title) +
