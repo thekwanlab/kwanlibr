@@ -389,7 +389,7 @@ make_volcano <- function(
 
   kwanlibr::ggsave_vector_raster(
     filename = file.path(figure_dir, paste0('volcano_', filename)),
-    width = 8, height = 8,
+    width = 6, height = 6, dpi = 600,
     plot = p
   )
 
