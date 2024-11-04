@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_edger_analyzer.R
 \name{make_volcano}
 \alias{make_volcano}
-\title{Create a volcano plot}
+\title{Create and save a volcano plot}
 \usage{
 make_volcano(
   lrt,

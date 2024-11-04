@@ -22,6 +22,6 @@ subset_samples(sampleTable, col, ...) selects a subset of rows from
 sampleTable where the value of col is in ...
 }
 \examples{
-subset_samples(samples, "Pool.Name", "Smc", "p21") # Selects only rows with 
+subset_samples(samples, "Pool.Name", "Smc", "p21") # Selects only rows with
 "Smc" or "p21" in the Pool.name column
 }

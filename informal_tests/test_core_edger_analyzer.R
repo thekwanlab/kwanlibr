@@ -1,4 +1,6 @@
+setwd('/nfs/turbo/umms-kykwan/projects/libraries/kwanlibr/')
 config = config::get(file = 'informal_tests/test_suite_config.yaml')
+devtools::document()
 devtools::load_all(config$paths$package)
 
 # ==============
@@ -42,14 +44,30 @@ lrt = kwanlibr::perform_edger(
 )
 
 # ===================
+# Test make_volcano_dataframe
+# ===================
+
+volcano_df = kwanlibr::make_volcano_dataframe(lrt)
+head(volcano_df)
+
+# ===================
+# Test draw_volcano
+# ===================
+
+p = kwanlibr::draw_volcano(lrt, figure_title = 'Volcano Time')
+p
+
+# ===================
+# Test label_volcano_genes
+# ===================
+
+p_labeled = label_volcano_plot_genes(p, lrt, c('Cars','Cars2'))
+p_labeled
+
+# ===================
 # Test make_volcano
 # ===================
-kwanlibr::make_volcano(
-  lrt = lrt,
-  figure_title="Gene X cKO vs Control",
-  filename = 'test_make_volcano',
-  figure_dir = config$paths$test_results_dump,
-)
+
 kwanlibr::make_volcano(
   lrt = lrt,
   figure_title="Gene X cKO vs Control",
