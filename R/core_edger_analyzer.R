@@ -241,6 +241,7 @@ make_volcano_dataframe <- function(
   ymax=40
 ) {
   volcano_df <- edgeR::topTags(lrt, n = nrow(lrt$table))$table
+  volcano_df$gene_name <- rownames(volcano_df)
   volcano_df$negLogPval <- -log10(volcano_df$PValue)
 
   # Create ceilings
