@@ -1,4 +1,3 @@
-setwd('/nfs/turbo/umms-kykwan/projects/libraries/kwanlibr/')
 config = config::get(file = 'informal_tests/test_suite_config.yaml')
 devtools::document()
 devtools::load_all(config$paths$package)
@@ -61,7 +60,7 @@ p
 # Test label_volcano_genes
 # ===================
 
-p_labeled = label_volcano_plot_genes(p, lrt, c('Cars','Cars2'))
+p_labeled = label_volcano_plot_genes(p, lrt, c('Cars','Cars2','Cars3','Cars4'))
 p_labeled
 
 # ===================
@@ -73,5 +72,5 @@ kwanlibr::make_volcano(
   figure_title="Gene X cKO vs Control",
   filename = 'test_make_volcano_labels',
   figure_dir = config$paths$test_results_dump,
-  label_genes = c('Foxp1', 'Neurod6', 'Rora')
+  label_genes = c('Cars', 'Cars2', 'Cux1', 'Cux2')
 )

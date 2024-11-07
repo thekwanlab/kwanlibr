@@ -22,6 +22,12 @@
 #constants
 IMPORTANT_TAGS <- c("gene_id", "gene_type", "gene_name")
 
+#export constants
+#' @export
+VOLCANO_BLUE = '#1a52f9'
+#' @export
+VOLCANO_RED = '#d80303'
+
 
 #---------------------
 # Functions
@@ -241,7 +247,10 @@ make_volcano_dataframe <- function(
   ymax=40
 ) {
   volcano_df <- edgeR::topTags(lrt, n = nrow(lrt$table))$table
-  volcano_df$gene_name <- rownames(volcano_df)
+  if (!'gene_name' %in% colnames(volcano_df)) {
+    warning('No `gene_name` column detected. Assigning gene names from row IDs')
+    volcano_df$gene_name <- rownames(volcano_df)
+  }
   volcano_df$negLogPval <- -log10(volcano_df$PValue)
 
   # Create ceilings
@@ -288,8 +297,8 @@ draw_volcano <- function(
 
   p <- ggplot(insig.points, aes(logFC, negLogPval)) +
     geom_point(col = 'grey', alpha = 0.1) +
-    geom_point(data = sig.down.points, col = '#1a52f9') +
-    geom_point(data = sig.up.points, col = '#d80303') +
+    geom_point(data = sig.down.points, col = VOLCANO_BLUE) +
+    geom_point(data = sig.up.points, col = VOLCANO_RED) +
     xlim(-xdiff, xdiff) +
     ylim(0, ymax) +
     ggtitle(figure_title) +
@@ -321,23 +330,29 @@ label_volcano_plot_genes <- function(
   lrt,
   label_genes
 ) {
-  volcano_df = make_volcano_dataframe(lrt=lrt)
-
+  volcano_df <- make_volcano_dataframe(lrt=lrt)
   label_df <- volcano_df[volcano_df$gene_name %in% label_genes,]
-    p <- p +
-    ggrepel::geom_label_repel(
-      data = label_df,
-      aes(logFC, negLogPval, label = gene_name),
-      max.overlaps = Inf,
-      box.padding = 0.5,
-      # force = 4,
-      size = 4,
-      min.segment.length = 0,
-      fill = "white",
-      fontface = "italic"
-      # parse = TRUE,
-    ) +
-    ggplot2::geom_point(data=label_df, col="cyan")
+  undetected_genes <- setdiff(label_genes, label_df$gene_name)
+  if (length(undetected_genes) > 0) {
+    warning(paste0('Gene names ',
+                   paste(undetected_genes, collapse=' '),
+                   ' were not found. Skipping labels.'))
+  }
+
+  p <- p +
+  ggrepel::geom_label_repel(
+    data = label_df,
+    aes(logFC, negLogPval, label = gene_name),
+    max.overlaps = Inf,
+    box.padding = 0.5,
+    # force = 4,
+    size = 4,
+    min.segment.length = 0,
+    fill = "white",
+    fontface = "italic"
+    # parse = TRUE,
+  ) +
+  ggplot2::geom_point(data=label_df, col="cyan")
 
   return(p)
 }
@@ -364,7 +379,6 @@ label_volcano_plot_genes <- function(
 #' @examples
 #' make_volcano(smc3, figure_title="Smc3 cKO", filename="edger_smc3",
 #' figure_dir=figure_dir)
-
 make_volcano <- function(
   lrt,
   figure_title,

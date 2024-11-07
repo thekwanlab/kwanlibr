@@ -1,6 +1,6 @@
 Package: kwanlibr
 Title: edgeR wrapper for simple differential expression analysis
-Version: 1.2.2
+Version: 1.2.3
 Authors@R: 
     c(
         person("Yaman", "Qalieh", , "yamanq@umich.edu", role = c("aut", "cre"),
