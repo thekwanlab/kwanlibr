@@ -4,15 +4,10 @@
 \alias{get_gtf}
 \title{Get reference}
 \usage{
-get_gtf(
-  gtf =
-    "/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.annotation.gtf",
-  verbose = FALSE
-)
+get_gtf(gtf, verbose = FALSE)
 }
 \arguments{
-\item{gtf}{Absolute path to the reference. Default is the GENCODE annotation
-for mm10/GRCm38}
+\item{gtf}{Absolute path to the reference}
 
 \item{verbose}{Set to TRUE to print number of genes in the reference}
 }
@@ -25,5 +20,5 @@ get_gtf(gtf, verbose) returns the reference specified by
 the path gtf.
 }
 \examples{
-get_gtf(gtf='/nfs/turbo/umms-kykwan/projects/reference/gtf/gencode.vM14.primary_assembly.ERCC.annotation.gtf')
+get_gtf(gtf='reference/gtf/gencode.vM14.primary_assembly.ERCC.annotation.gtf')
 }
