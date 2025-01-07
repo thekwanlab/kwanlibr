@@ -34,11 +34,30 @@ exp_samples = kwanlibr::label_control_samples(exp_samples, 'Condition', 'ctrl')
 # ===================
 # Test perform_edger
 # ===================
+
+# GTF object
 lrt = kwanlibr::perform_edger(
   exp_samples,
   filePrefix = config$paths$gene_counts_dir,
   idCol = 'Pool.Name',
   gtf=gtf,
+  saveName = paste0(config$paths$test_results_dump, 'edger_lrt')
+)
+
+# GTF file path
+lrt = kwanlibr::perform_edger(
+  exp_samples,
+  filePrefix = config$paths$gene_counts_dir,
+  idCol = 'Pool.Name',
+  gtf=config$paths$gtf,
+  saveName = paste0(config$paths$test_results_dump, 'edger_lrt')
+)
+
+# no GFT
+lrt = kwanlibr::perform_edger(
+  exp_samples,
+  filePrefix = config$paths$gene_counts_dir,
+  idCol = 'Pool.Name',
   saveName = paste0(config$paths$test_results_dump, 'edger_lrt')
 )
 
