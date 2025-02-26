@@ -416,7 +416,7 @@ make_volcano <- function(
 
 #' Create and save a ma plot
 #' 
-#' make_ma(lrt, figure_title, filename, figure_dir, fdr, xmax, ydiff) creates a 
+#' make_MA_plot(lrt, figure_title, filename, figure_dir, fdr, xmax, ydiff) creates a 
 #' MA plot from the data in lrt with title figure_title and saves it in 
 #' a pdf and png under the folder figure_dir
 #' 
@@ -425,27 +425,27 @@ make_volcano <- function(
 #' @param ma_figure_title The title of the MA plot (ex. logCPM vs logFC)
 #' @param file_name The base name for the saved plot file
 #' @param figure_dir Directory to save the plots under
-#' @param fdr False discovery rate threshold. Genes > fdr are colored
+#' @param fdr False discovery rate threshold. Genes <= fdr are colored
 #' @param xmax x-axis ceiling
 #' @param ydiff y-axis ceiling in both directions. For example, ydiff=5 sets the
 #'  y axis to -5 to 5
-#' @param loess_line line of estimate of mean, TRUE produces plot with loess line,
-#' FALSE produced otherwise
+#' @param smooth_line line of estimate of mean, FALSE shows no smooth line, TRUE 
+#' otherwise
 #' @keywords ma plot
 #' @import ggplot2
 #' @export
 #' @examples
-#' make_ma(lrt =lrt, figure_title="logCPM vs logFC", filename = "test_make_ma_plot",
+#' make_MA_plot(lrt =lrt, figure_title="logCPM vs logFC", filename = "test_make_ma_plot",
 #' figure_dir = "informal_tests")
 
-make_ma <- function(lrt, 
+make_MA_plot <- function(lrt, 
                     figure_title, 
                     filename, 
                     figure_dir, 
                     fdr = 0.01, 
                     xmax = NULL, 
                     ydiff = 5,
-                    loess_line = TRUE){
+                    smooth_line = FALSE){
   # check if lrt is empty file, if empty return "lrt is empty, check and perform_edgr()
   if (is.null(lrt) || nrow(lrt) == 0){
     stop("Error: lrt is empty. Check and run perform_edger().")
@@ -479,9 +479,14 @@ make_ma <- function(lrt,
           axis.title = element_text(size = 15),
           axis.text = element_text(size=12))
   
-  # Add loess line as requested
-  if (loess_line) {
-    p <- p + geom_smooth(method = "loess", color = "#FFFF09", se = FALSE)
+  # Add smooth line as requested
+  if (smooth_line) {
+    p <- p + geom_smooth(
+      data = volcano_df, 
+      method = "gam",
+      color = "#191919",
+      se = FALSE
+    )
   }
   
   kwanlibr::ggsave_vector_raster(
