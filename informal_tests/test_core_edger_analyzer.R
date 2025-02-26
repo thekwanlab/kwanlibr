@@ -93,3 +93,23 @@ kwanlibr::make_volcano(
   figure_dir = config$paths$test_results_dump,
   label_genes = c('Cars', 'Cars2', 'Cux1', 'Cux2')
 )
+
+# ===================
+# Test make_ma
+# ===================
+
+kwanlibr::make_ma(
+  lrt =lrt,
+  figure_title="logCPM vs logFC",
+  filename = "test_make_ma_plot",
+  figure_dir = "informal_tests"
+)
+
+kwanlibr::make_ma(
+  lrt =lrt,
+  figure_title="logCPM vs logFC",
+  filename = "test_make_ma_plot",
+  figure_dir = "informal_tests",
+  xmax = 10,
+  loess_line = FALSE
+)
