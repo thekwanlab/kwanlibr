@@ -79,3 +79,80 @@ clamp <- function(
          upper,
          ifelse(x < lower, lower, x))
 }
+
+#' draw_PCA()
+#'
+#' run PCA and draw PCA plot
+#'
+#' @param df A data-matrix or data-frame
+#' @param label_list A vector that contains assigned groups of the sample, the 
+#' length of the vector should be the same as the number of samples in the df 
+#' @param color_list A vector that contains colors of the choice, the length of 
+#' the vector should be equal to the number of unique elements in label_list. By 
+#' default, use ggplot default colors
+#' @param legend Boolean values, if True, draw the legend on the PCA, if false, 
+#' no legend. Default is set to TRUE
+#' 
+#' @import ggplot2
+#' 
+#' @export
+#' 
+#' @examples
+#' draw_PCA(iris[-5], label_list = iris$Species, color_list = c("green", "blue", "yellow"))
+#' draw_PCA(iris[-5], label_list = iris$Species)
+#' draw_PCA(iris[-5], legend=FALSE)
+#' draw_PCA(iris[-5]) if no label_list, no legend is produced
+
+draw_PCA <- function(df, 
+                     label_list=NULL, 
+                     color_list=NULL, 
+                     legend=TRUE){
+  #Check if df has non-numerical columns
+  if (!all(sapply(df, is.numeric))) {
+    return("Check the structure of the df, make sure df only contains numerical inputs.")
+  }
+  
+  # Validate length of label_list if provided
+  if (!is.null(label_list) && length(label_list) != nrow(df)) {
+    return("Check the label_list, make sure the length matches the number of samples in df.")
+  }
+  
+  # Validate color_list if label_list is provided
+  if (!is.null(label_list) && !is.null(color_list) && length(color_list) != length(unique(label_list))) {
+    return("Check the color_list, make sure the number of distinct colors matches 
+           the number of unique labels in label_list.")
+  }
+  pca_result <- prcomp(df,center = TRUE)
+  
+  #Build a data frame
+  pcaData <- as.data.frame(pca_result$x)
+  
+  if (!is.null(label_list)) {
+    pcaData$Group <- label_list # add group to df
+  }
+  
+  # Calculate % Variance Explained
+  PoV <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+  VoPC1 <- sprintf("%.2f%%", PoV[1] * 100)
+  VoPC2 <- sprintf("%.2f%%", PoV[2] * 100)
+  
+  # Create the plot
+  if (is.null(label_list)) {
+    p <- ggplot(pcaData, aes(x = PC1, y = PC2)) +
+      geom_point(size = 2)
+  } else {
+    p <- ggplot(pcaData, aes(x = PC1, y = PC2, color = Group)) +
+      geom_point(size = 2)
+  }
+  p <- p + xlab(paste0("PC1: ", VoPC1)) +
+    ylab(paste0("PC2: ", VoPC2)) +
+    theme_minimal()
+  
+  if (!is.null(color_list)) {
+    p <- p + scale_color_manual(values=color_list)
+  }
+  if (!legend) {
+    p <- p + theme(legend.position = "none")
+  }
+  return(p)
+}

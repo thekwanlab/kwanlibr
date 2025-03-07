@@ -28,3 +28,13 @@ clamp(x)
 clamp(x, lower=4, upper=15)
 clamp(x, lower=10, upper=10)
 clamp(x, lower=10, upper=2) # throw error
+
+# =========================
+# test draw_PCA
+# =========================
+
+draw_PCA(iris[-5], label_list = iris$Species, color_list = c("green", "blue", "yellow"))
+draw_PCA(iris[-5], label_list = iris$Species)
+draw_PCA(iris[-5], label_list = iris$Species, legend = FALSE)
+draw_PCA(iris[-5], legend=FALSE)
+draw_PCA(iris[-5])
