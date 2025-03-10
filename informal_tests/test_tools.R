@@ -33,8 +33,20 @@ clamp(x, lower=10, upper=2) # throw error
 # test draw_PCA
 # =========================
 
-draw_PCA(iris[-5], label_list = iris$Species, color_list = c("green", "blue", "yellow"))
-draw_PCA(iris[-5], label_list = iris$Species)
-draw_PCA(iris[-5], label_list = iris$Species, legend = FALSE)
+draw_PCA(iris[-5], label = iris$Species, color = c("green", "blue", "yellow"))
+draw_PCA(iris[-5], label = iris$Species)
+draw_PCA(iris[-5], label = iris$Species, legend = FALSE)
 draw_PCA(iris[-5], legend=FALSE)
 draw_PCA(iris[-5])
+draw_PCA(mtcars, label = mtcars$vs, color = c("coral", "cyan"))
+draw_PCA(mtcars, label = mtcars$vs, color = c("coral", "cyan"), legend = FALSE)
+draw_PCA(mtcars, label = mtcars$carb, legend = FALSE)
+draw_PCA(mtcars, label = mtcars$gear)
+
+library(palmerpenguins)
+df <- na.omit(penguins)
+draw_PCA(df[-c(1,2,7)], label = df$species, color = c("cyan", "coral", "orange"))
+draw_PCA(df[-c(1,2,7)], label = df$sex, color = c("cyan", "violet"))
+draw_PCA(df[-c(1,2,7)], label = df$island, color = c("cyan", "violet", "lightblue4"))
+draw_PCA(df[-c(1,2,7)], label = df$year)
+draw_PCA(df[-c(1,2,7)], label = df$year, legend = FALSE)

@@ -4,27 +4,31 @@
 \alias{draw_PCA}
 \title{draw_PCA()}
 \usage{
-draw_PCA(df, label_list = NULL, color_list = NULL, legend = TRUE)
+draw_PCA(data, label = NULL, color = NULL, legend = TRUE)
 }
 \arguments{
-\item{df}{A data-matrix or data-frame}
+\item{data}{A data-matrix or data-frame, where the rows of the data should be
+observations, and columns should be numerical variables}
 
-\item{label_list}{A vector that contains assigned groups of the sample, the
+\item{label}{A vector that contains assigned groups of the sample, the
 length of the vector should be the same as the number of samples in the df}
 
-\item{color_list}{A vector that contains colors of the choice, the length of
-the vector should be equal to the number of unique elements in label_list. By
+\item{color}{A vector that contains colors of the choice, the length of
+the vector should be equal to the number of unique elements in label. By
 default, use ggplot default colors}
 
 \item{legend}{Boolean values, if True, draw the legend on the PCA, if false,
 no legend. Default is set to TRUE}
 }
+\value{
+A ggplot object of PCA
+}
 \description{
 run PCA and draw PCA plot
 }
 \examples{
-draw_PCA(iris[-5], label_list = iris$Species, color_list = c("green", "blue", "yellow"))
+draw_PCA(iris[-5], label = iris$Species, color = c("green", "blue", "yellow"))
 draw_PCA(iris[-5], label_list = iris$Species)
 draw_PCA(iris[-5], legend=FALSE)
-draw_PCA(iris[-5]) if no label_list, no legend is produced
+draw_PCA(iris[-5]) # if no label_list, no legend is produced
 }
