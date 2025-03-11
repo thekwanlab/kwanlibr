@@ -53,7 +53,7 @@ lrt = kwanlibr::perform_edger(
   saveName = paste0(config$paths$test_results_dump, 'edger_lrt')
 )
 
-# no GFT
+# no GTF
 lrt = kwanlibr::perform_edger(
   exp_samples,
   filePrefix = config$paths$gene_counts_dir,
@@ -113,3 +113,18 @@ kwanlibr::make_MA_plot(
   xmax = 10,
   smooth_line = TRUE
 )
+
+# ==============
+# Test make_PCA_plot
+# ==============
+
+make_PCA_plot(lrt, color = c("blue", "red"), figure_title = "Principal Component Analysis", 
+              figure_dir = config$paths$test_results_dump, filename = "plot_assigned_color_and_legend")
+make_PCA_plot(lrt, legend = FALSE, figure_title = "Principal Component Analysis", 
+              figure_dir = config$paths$test_results_dump, filename = "plot_default_color_no_legend")
+make_PCA_plot(lrt, figure_title = "Principal Component Analysis", 
+              figure_dir = config$paths$test_results_dump, filename = "plot_default_color_and_legend")
+make_PCA_plot(lrt, label = TRUE, figure_title = "Principal Component Analysis", 
+              figure_dir = config$paths$test_results_dump, filename = "plot_labels_default_color_and_legend")
+make_PCA_plot(lrt, figure_title = "Principal Component Analysis", 
+              figure_dir = config$paths$test_results_dump, filename = "plot_no_labels_default_color_and_legend")
