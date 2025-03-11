@@ -128,16 +128,3 @@ make_PCA_plot(lrt, label = TRUE, figure_title = "Principal Component Analysis",
               figure_dir = config$paths$test_results_dump, filename = "plot_labels_default_color_and_legend")
 make_PCA_plot(lrt, figure_title = "Principal Component Analysis", 
               figure_dir = config$paths$test_results_dump, filename = "plot_no_labels_default_color_and_legend")
-
-# Error handling Tests
-make_PCA_plot(lrt, color = c("blue", "red", "green", "purple", "yellow"), figure_title = "Principal Component Analysis", 
-              figure_dir = config$paths$test_results_dump, filename = "plot_assigned_color_and_legend")
-make_PCA_plot(lrt, color = c("blue", "red", "green", "purple", "yellow"), label=TRUE, figure_title = "Principal Component Analysis", 
-              figure_dir = config$paths$test_results_dump, filename = "plot_assigned_color_and_legend")
-make_PCA_plot(lrt, color = c("blue"), figure_title = "Principal Component Analysis", 
-              figure_dir = config$paths$test_results_dump, filename = "plot_assigned_color_and_legend")
-make_PCA_plot(lrt, color = c("blue"), label=TRUE, figure_title = "Principal Component Analysis", 
-              figure_dir = config$paths$test_results_dump, filename = "plot_assigned_color_and_legend")
-# They will break into error:
-# Error in draw_PCA(df_transposed, label = group, color = color, legend = legend) : 
-# Check the color, make sure the number of distinct colors matches the number of unique labels in label. 

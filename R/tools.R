@@ -109,17 +109,17 @@ draw_PCA <- function(data,
                      label=NULL, 
                      color=NULL, 
                      legend=TRUE){
-  #Check if df has non-numerical columns
+  #Check if data has non-numerical columns
   if (!all(sapply(data, is.numeric))) {
-    stop("Check the structure of the df, make sure df only contains numerical inputs.")
+    stop("Check the structure of the data, make sure data only contains numerical inputs.")
   }
   
-  # Validate length of label_list if provided
+  # Validate length of label if provided
   if (!is.null(label) && length(label) != nrow(data)) {
-    stop("Check the label, make sure the length matches the number of samples in df.")
+    stop("Check the label, make sure the length matches the number of samples in data.")
   }
   
-  # Validate color_list if label_list is provided
+  # Validate color if label is provided
   if (!is.null(label) && !is.null(color) && length(color) != length(unique(label))) {
     stop("Check the color, make sure the number of distinct colors matches the 
          number of unique labels in label.")
