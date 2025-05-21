@@ -82,6 +82,7 @@ perform_diffbind <- function(
   if (is.null(samplesheetpath) || !file.exists(samplesheetpath)) {
     stop("The 'samplesheetpath' is invalid or the file does not exist.")
   }
+  samplesheet <- read.csv(samplesheetpath, stringsAsFactors = FALSE)
 
   required_columns <- c("Sample_ID", "Tissue", "Condition", "bamReads",
                         "Peaks", "PeakCaller")
@@ -156,6 +157,13 @@ get_DBsites <- function(
   if (is.null(dbaobjpath)|| !file.exists(dbaobjpath)){
     stop("check again on dbaobj to see if it is a valid path and file.")
   }
+
+  dba.obj <- tryCatch({
+    readRDS(dbaobjpath)
+  }, error = function(e) {
+    stop("Failed to read the DBA object from path: ", dbaobjpath, "\nError: ", e$message)
+  })
+
   if (contrastnumber <= 0 || contrastnumber > length(dba.obj$contrasts)) {
     stop("Invalid contrastnumber. Please provide a valid contrast index.")
   }

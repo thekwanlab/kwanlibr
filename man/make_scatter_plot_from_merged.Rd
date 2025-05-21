@@ -54,9 +54,10 @@ drawn to the scatter plot. otherwise no regression line.}
 \code{'aquamarine4'}.}
 }
 \description{
-make_scatter_plot_from_merged() create scatter plot from merged differential
-binding sites with differential expression data and save the plot under designated
-directory.
+make_scatter_plot_from_merged(allDBsitepath, RNAfilepath, sigsitespath, filepath,
+figure_title, figure_path, filename, width, height, size, regression, BULK_FDR_CUTOFF,
+point_color, line_color) create scatter plot from merged differential binding sites
+with differential expression data and save the plot under designated directory.
 }
 \examples{
 make_scatter_plot_from_merged()

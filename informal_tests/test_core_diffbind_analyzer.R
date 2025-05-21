@@ -6,7 +6,7 @@ devtools::load_all(config$paths$package)
 # Test perform_diffbind
 # ==============
 samplecsv = config$paths$binding_sites_samples_example
-perform_diffbind(samplecsv,
+perform_diffbind(samplesheetpath = samplecsv,
                  minMembers = 2,
                  reference="HET",
                  FDRthreshold = 0.05,
