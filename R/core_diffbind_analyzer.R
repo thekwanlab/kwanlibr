@@ -167,8 +167,8 @@ get_DBsites <- function(
   if (contrastnumber <= 0 || contrastnumber > length(dba.obj$contrasts)) {
     stop("Invalid contrastnumber. Please provide a valid contrast index.")
   }
-  if (is.null(filePath)) {
-    filePath <- getwd()
+  if (is.null(filepath)) {
+    filepath <- getwd()
   }
 
   #read DBA object
