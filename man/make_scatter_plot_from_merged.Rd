@@ -5,37 +5,27 @@
 \title{Create and save the scattor plot from DB and DE Data}
 \usage{
 make_scatter_plot_from_merged(
-  allDBsitepath,
-  RNAfilepath,
-  sigsitespath,
-  filepath,
+  merged_df,
   figure_title,
-  figure_path,
-  filename,
+  figure_save_path,
+  file_name,
   width = 8,
   height = 6,
   size = 1,
   regression = TRUE,
-  BULK_FDR_CUTOFF = 0.05,
+  contrast_number = 1,
   point_color = "black",
   line_color = "aquamarine4"
 )
 }
 \arguments{
-\item{allDBsitepath}{Character. Path to BED file of all differential binding sites.}
-
-\item{RNAfilepath}{Character. Path to RNA-seq results CSV (must include gene_name, logFC, FDR).}
-
-\item{sigsitespath}{Character. Path to BED file of significant sites.}
-
-\item{filepath}{Character. Directory path for storing intermediate files, including
-the TSS BED file, sorted BED file, and nearest gene lookup TSV.}
+\item{merged_df}{Merged data generated from running \code{merge_sites_with_exp()}}
 
 \item{figure_title}{Character. The scatter plot title.}
 
-\item{figure_path}{Character. Directory to save the figure output.}
+\item{figure_save_path}{Character. Directory to save the figure output.}
 
-\item{filename}{Character. The name of the file.}
+\item{file_name}{Character. The base name of the scatter plot file.}
 
 \item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
 
@@ -46,7 +36,8 @@ the TSS BED file, sorted BED file, and nearest gene lookup TSV.}
 \item{regression}{logical value. Default is set to 'TRUE', a regression line is
 drawn to the scatter plot. otherwise no regression line.}
 
-\item{BULK_FDR_CUTOFF}{Numeric FDR threshold to filter DE genes. Default is 0.05.}
+\item{contrast_number}{Integer. Index indicating which contrast to extract from
+the DBA object. Defeault is set to \code{1}.}
 
 \item{point_color}{Character Value. The color of the point. Default is \code{'black'}.}
 
@@ -54,11 +45,15 @@ drawn to the scatter plot. otherwise no regression line.}
 \code{'aquamarine4'}.}
 }
 \description{
-make_scatter_plot_from_merged(allDBsitepath, RNAfilepath, sigsitespath, filepath,
-figure_title, figure_path, filename, width, height, size, regression, BULK_FDR_CUTOFF,
-point_color, line_color) create scatter plot from merged differential binding sites
-with differential expression data and save the plot under designated directory.
+make_scatter_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
+width, height, size, regression, contrast_number, point_color, line_color) create
+scatter plot from merged differential binding sites with differential expression
+data and save the plot under designated directory.
 }
 \examples{
-make_scatter_plot_from_merged()
+make_scatter_plot_from_merged(
+  merged_df = merged_sigsites,
+  figure_title = "DB vs DE log2FC",
+  figure_save_path = "diffbind_figures",
+  file_name = "db_bulk_scatter")
 }

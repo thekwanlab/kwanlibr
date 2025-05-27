@@ -5,54 +5,53 @@
 \title{Create and save a density plot}
 \usage{
 make_density_plot(
-  dbaobjpath,
+  dba_object,
   figure_title,
-  filename,
-  figure_dir = NULL,
-  contrastnumber = 1,
-  FDR_THRESHOLD = 0.05,
+  file_name,
+  fdr_threshold = 1,
+  figure_save_path = NULL,
+  contrast_number = 1,
   width = 8,
   height = 6,
-  DENSITY_color = "aquamarine4"
+  color = "aquamarine4"
 )
 }
 \arguments{
-\item{dbaobjpath}{Character. Path to the saved DBA object (RDS format) from \code{perform_diffbind()}.}
+\item{dba_object}{DBA object obtained after \code{perform_diffbind()}.}
 
-\item{figure_title}{Character. Title displayed at the top of the plot.}
+\item{figure_title}{Character. Title for density plot.}
 
-\item{filename}{Character. Base name (without extension) used for saving the plot files.}
+\item{file_name}{Character. Base name used for saving the plot files.}
 
-\item{figure_dir}{Character. Directory path where the plot files will be saved. Default
-is set to \code{NULL}.}
+\item{fdr_threshold}{Numeric. FDR cutoff for significance (Default is 1).}
 
-\item{contrastnumber}{Integer. Index indicating which contrast to extract from the DBA
-object. Defeault is set to \code{1}.}
+\item{figure_save_path}{Character. Directory path where the plot files will be saved.
+Default is set to \code{NULL}.}
 
-\item{FDR_THRESHOLD}{Numeric. The FDR threshold used for annotation purposes in the plot
-title. Default is \code{0.05}.}
+\item{contrast_number}{Integer. Index indicating which contrast to extract from the
+DBA object. Defeault is set to \code{1}.}
 
 \item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
 
 \item{height}{Numeric. Height dimensions of saved plot in inches. Default is 6.}
 
-\item{DENSITY_color}{Character. Color to fill the density plot. Default is \code{"aquamarine4"}.}
+\item{color}{Character. Color to fill the density plot. Default is \code{"aquamarine4"}.}
 }
 \value{
-A \code{ggplot2} object containing the generated density plot.
+A ggplot object of density plot.
 }
 \description{
-make_density_plot(dbaobjpath, figure_title, filename, figure_dir, contrast_number,
-FDR_THRESHOLD, width, height, DENSITY_color) creates a density plot from a DBA
-object with specified figure title and saves it in pdf and png format under the
-designated file path.
+make_density_plot(dba_object, figure_title, file_name, fdr_threshold, figure_save_path,
+contrast_number, width, height, color) creates a density plot from a DBA object
+with specified figure title and saves it in pdf and png format under the designated
+file path.
 }
 \examples{
 make_density_plot(
-  dbaobjpath=dbaobjpath,
-  figure_title="Distribution of Differential Binding Regions",
-  figure_dir="diffbind_figures"),
-  filename="df_fold_density_h3k27ac")
+  dba_object = dba.obj,
+  figure_title = "Distribution of Differential Binding Regions",
+  file_name = "df_fold_density_h3k27ac",
+  figure_save_path = "diffbind_figures")
 }
 \keyword{Density}
 \keyword{Plot}

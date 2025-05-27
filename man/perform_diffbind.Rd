@@ -5,19 +5,17 @@
 \title{Perform Diffbind Analysis}
 \usage{
 perform_diffbind(
-  samplesheetpath,
-  reference,
-  minMembers = NULL,
-  analysismethod = DBA_DESEQ2,
-  datatype = DBA_DATA_FRAME,
-  FDRthreshold = 0.05,
-  normalization = DBA_NORM_LIB,
-  filesuffix = NULL,
-  filePath = NULL
+  sample_sheet_path,
+  control_level,
+  min_members = NULL,
+  analysis_method = DBA_DESEQ2,
+  data_type = DBA_DATA_FRAME,
+  fdr_threshold = 0.05,
+  normalization = DBA_NORM_LIB
 )
 }
 \arguments{
-\item{samplesheetpath}{Character. The path to the sample CSV file.
+\item{sample_sheet_path}{Character. The path to the sample CSV file.
 Normally the file is named 'diffbind_samples.csv' and placed in the current
 working directory. It must contain the following columns:
 \itemize{
@@ -29,38 +27,35 @@ working directory. It must contain the following columns:
 \item \strong{"PeakCaller"}
 }}
 
-\item{reference}{Character. Reference group name (e.g., "HET", "Ctrl").}
+\item{control_level}{Character. Reference group name (e.g., "HET", "Ctrl").}
 
-\item{minMembers}{Integer. Minimum number of replicates per condition (default is \code{NULL}).
+\item{min_members}{Integer. Minimum number of replicates per condition (default is \code{NULL}).
 Set to 2 if any condition has only 2 replicates, otherwise set to \code{NULL}.}
 
-\item{analysismethod}{The analysis method, either \code{DBA_DESEQ2} (default) or \code{DBA_EDGER}.}
+\item{analysis_method}{The analysis method, either \code{DBA_DESEQ2} (default) or \code{DBA_EDGER}.}
 
-\item{datatype}{Output format of peak data (default is \code{DBA_DATA_FRAME}).
+\item{data_type}{Output format of peak data (default is \code{DBA_DATA_FRAME}).
 Other options are \code{DBA_DATA_GRANGES}, \code{DBA_DATA_RANGEDDATA}.}
 
-\item{FDRthreshold}{Numeric. FDR cutoff for significance, used in both filtering
+\item{fdr_threshold}{Numeric. FDR cutoff for significance, used in both filtering
 and visualization (Default is 0.05).}
 
 \item{normalization}{Normalization method (default is \code{DBA_NORM_LIB}). Other options
 include \code{DBA_NORM_RLE}, \code{DBA_NORM_TMM}, etc.}
-
-\item{filesuffix}{Character. Suffix for the output DBA object file.}
-
-\item{filePath}{Character. Directory path to save the resulting DBA object (default is \code{NULL}).
-If \code{NULL}, current working directory is used.}
+}
+\value{
+analyzed DBA object
 }
 \description{
-perform_diffbind(samplesheetpath, reference, minMembers, analysismethod, datatype,
-FDRthreshold, normalization, filesuffix, filePath) performs a complete DiffBind
-analysis workflow using a provided sample sheet. It includes blacklist filtering,
-counting, normalization, and contrast setup. The resulting DBA object is saved as
-an RDS file under specific file path.
+perform_diffbind(sample_sheet_path, control_level, min_members, analysis_method,
+data_type, fdr_threshold, normalization) performs a complete DiffBind analysis
+workflow using a provided sample sheet, which includes blacklist filtering, counting,
+normalization, and contrast setup.
 }
 \examples{
-perform_diffbind(samplesheetpath = "diffbind_samples.csv",
-                 reference = "HET",
-                 minMembers = 2,
-                 filesuffix = "h3k27me3",
-                 filepath = "diffbind_files")
+perform_diffbind(
+  sample_sheet_path = "diffbind_samples.csv",
+  control_level = "HET",
+  min_members = 2)
 }
+\keyword{diffbind}

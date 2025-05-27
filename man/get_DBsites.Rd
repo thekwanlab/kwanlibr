@@ -4,29 +4,25 @@
 \alias{get_DBsites}
 \title{Retrieve Differentially Bind Sites from a DBA object}
 \usage{
-get_DBsites(
-  dbaobjpath,
-  FDR_THRESHOLD = 0.05,
-  contrastnumber = 1,
-  filepath = NULL
-)
+get_DBsites(dba_object, fdr_threshold = 0.05, contrast_number = 1)
 }
 \arguments{
-\item{dbaobjpath}{Character. File path to the DBA object (RDS file) created from \code{perform_diffbind()}}
+\item{dba_object}{DBA object obtained after \code{perform_diffbind()}.}
 
-\item{FDR_THRESHOLD}{Numeric. Significance cutoff for filtering DB sites. Default is \code{0.05}.}
+\item{fdr_threshold}{Numeric. Significance cutoff for filtering DB sites.
+Default is \code{0.05}.}
 
-\item{contrastnumber}{Integer. Index specifying which contrast to extract results from. Defaults to \code{1},
-corresponding to the first contrast.}
-
-\item{filepath}{Character. Output directory where results are written.}
+\item{contrast_number}{Integer. Index specifying which contrast to extract
+results from. Defaults to \code{1} corresponding to the first contrast.}
+}
+\value{
+A dataframe that contains filtered sites information.
 }
 \description{
-get_DBsites(dbaobjpath, FDR_THRESHOLD, contrastnumber, filepath) Extracts differentially
-bound (DB) regions from a DBA object and writes the results into BED-formatted files. The
-function filters regions based on a user-defined FDR threshold and saves separate files for
-all significant sites, upregulated, and downregulated sites.
+get_DBsites(dba_object, fdr_threshold, contrast_number) Extracts differentially
+bound (DB) regions from a DBA object and filters regions based on a user-defined
+FDR threshold, finally returns a dataframe that contains sites information.
 }
 \examples{
-get_DBsites(dbaobjpath=dbaobjpath)
+get_DBsites(dba_object = dba.obj)
 }

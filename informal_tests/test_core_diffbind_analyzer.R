@@ -5,81 +5,86 @@ devtools::load_all(config$paths$package)
 # ==============
 # Test perform_diffbind
 # ==============
-samplecsv = config$paths$binding_sites_samples_example
-perform_diffbind(samplesheetpath = samplecsv,
-                 minMembers = 2,
-                 reference="HET",
-                 FDRthreshold = 0.05,
-                 filesuffix="h3k27ac",
-                 normalization = DBA_NORM_RLE,
-                 filePath=config$paths$test_results_dump)
+samplecsv <- config$paths$binding_sites_samples_example
+dba.obj <- perform_diffbind(sample_sheet_path = samplecsv,
+                            min_members = 2,
+                            control_level ="HET",
+                            fdr_threshold = 0.05,
+                            normalization = DBA_NORM_RLE)
+
+# ==============
+# Test save_diffbind_object
+# ==============
+save_diffbind_object(dba_object=dba.obj,
+                     file_suffix = "h3k27ac",
+                     dbaobj_save_path = "informal_tests/test_results")
 
 # ==============
 # Test get_DBsites
 # ==============
-dbapath = paste0(config$paths$test_results_dump, "dba_obj_h3k27ac.RDS")
-get_DBsites(dbapath,filepath = paste0(config$paths$test_results_dump, "diffbind_files"))
+sig.sites <- get_DBsites(dba.obj, fdr_threshold = 0.05, contrast_number = 1)
+
+all.sites <- get_DBsites(dba.obj, fdr_threshold = 1, contrast_number = 1)
+
+# ==============
+# Test save_sites
+# ==============
+save_sites(dba.obj,
+           save_path = paste0(config$paths$test_results_dump, "diffbind_files"),
+           fdr_threshold = 0.05,
+           contrast_number = 1)
 
 #===============
 # Test make_density_plot
 #===============
-dbapath = paste0(config$paths$test_results_dump, "dba_obj_h3k27ac.RDS")
-make_density_plot(dbapath,
-                  DENSITY_color='aquamarine4',
+make_density_plot(dba.obj,
+                  fdr_threshold = 1,
+                  color='aquamarine4',
                   figure_title="Distribution of Differential Binding Regions",
-                  figure_dir = paste0(config$paths$test_results_dump, "diffbind_figures"),
-                  filename="df_fold_density_h3k27ac")
+                  figure_save_path = paste0(config$paths$test_results_dump, "diffbind_figures"),
+                  file_name="df_fold_density_h3k27ac")
 
 #===============
 # Test make_PCA_plot_diffbind
 #===============
-dbapath = paste0(config$paths$test_results_dump, "dba_obj_h3k27ac.RDS")
-make_PCA_plot_diffbind(dbapath,
+make_PCA_plot_diffbind(dba.obj,
                        figure_title_nocontrast="All consensus Peaks: h3k27ac HET vs KO",
                        figure_title_contrast="'Differential Binding Peaks: h3k27ac HET vs KO'",
-                       figure_dir=paste0(config$paths$test_results_dump, "diffbind_figures"),
-                       filename="PCA_consensus_vs_diffbind_peaks_kwanlib_h3k27ac")
+                       figure_save_path=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                       file_name="PCA_consensus_vs_diffbind_peaks_kwanlib_h3k27ac")
 
 #===============
 # Test make_volcano_sites
 #===============
-dbapath = paste0(config$paths$test_results_dump, "dba_obj_h3k27ac.RDS")
-make_volcano_sites(dbapath,
-                   sigsitespath=paste0(config$paths$test_results_dump, "diffbind_files/", "sig_sites.bed"),
-                   filepath=paste0(config$paths$test_results_dump, "diffbind_files"),
-                   xdiff=1,
-                   ymax=10)
+volcano.sites <- make_volcano_sites(dba.obj, xdiff=1, ymax=10)
 
 #===============
 # Test make_volcano_plot_diffbind
 #===============
-make_volcano_plot_diffbind(volcanopath = paste0(config$paths$test_results_dump, "diffbind_files/", "volcano_sites.bed"),
-                           sigsitespath = paste0(config$paths$test_results_dump, "diffbind_files/", "sig_sites.bed"),
+make_volcano_plot_diffbind(dba.obj,
                            figure_title="h3k27ac cKO vs cHET",
-                           figure_dir=paste0(config$paths$test_results_dump, "diffbind_figures"),
-                           filename="db_volcano",
+                           figure_save_path=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                           file_name="db_volcano_h3k27ac",
+                           contrast_number = 1,
                            xdiff = 1,
                            ymax = 10)
 #================
 # Test merge_sites_with_exp
 #================
-merged_data <- merge_sites_with_exp(allDBsitepath = "/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/allDB_sites.bed",
-                     joindatapath = "/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/volcano_sites.bed",
-                     RNAfilepath = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
-                     filepath = paste0(config$paths$test_results_dump, "diffbind_files"),
-                     BULK_FDR_CUTOFF = 0.05)
+dba.obj <- readRDS("/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/dba_obj_mll_me1.RDS")
+volcano.sites <- make_volcano_sites(dba.obj, xdiff = 2, ymax = 17.5)
+volcano_merged_data <- merge_sites_with_exp(dba.obj,
+                                            RNAfile_path = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
+                                            save_path = paste0(config$paths$test_results_dump, "diffbind_files_me1"),
+                                            join_data_sites = volcano.sites)
 
 #=================
 # Test make_volcano_plot_from_merged
 #=================
-make_volcano_plot_from_merged(allDBsitepath = "/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/allDB_sites.bed",
-                              RNAfilepath="/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
-                              volcanopath="/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/volcano_sites.bed",
-                              filepath=paste0(config$paths$test_results_dump, "diffbind_files"),
-                              BULK_FDR_CUTOFF=0.05,
+make_volcano_plot_from_merged(merged_df = volcano_merged_data,
                               figure_title='cKO vs cHet Differential Binding sites',
-                              filename="db_volcano_bulk_color_binary",
-                              figure_path=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                              figure_save_path=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                              file_name="db_volcano_bulk_color_binary_h3k4me1",
                               color=c('grey','steelblue', 'tomato'),
                               xdiff = 2,
                               ymax = 17.5,
@@ -91,26 +96,25 @@ make_volcano_plot_from_merged(allDBsitepath = "/nfs/turbo/umms-kykwan/projects/m
 #=================
 # Test make_scatter_plot_from_merged
 #=================
-make_scatter_plot_from_merged(allDBsitepath = "/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/allDB_sites.bed",
-                              RNAfilepath="/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
-                              sigsitespath="/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/sig_sites.bed",
-                              filepath=paste0(config$paths$test_results_dump, "diffbind_files"),
-                              BULK_FDR_CUTOFF=1,
+sig.sites <- get_DBsites(dba.obj, fdr_threshold = 0.05, contrast_number = 1)
+sigsites_merged_data <- merge_sites_with_exp(dba.obj,
+                                             RNAfile_path = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
+                                             save_path = paste0(config$paths$test_results_dump, "diffbind_files_me1"),
+                                             join_data_sites = sig.sites,
+                                             bulk_fdr_cutoff = 1)
+
+make_scatter_plot_from_merged(sigsites_merged_data,
                               figure_title ="DB sites log2FC vs Nearby Gene RNAseq log2FC",
-                              filename="db_bulk_scatter",
-                              figure_path=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                              file_name="db_bulk_scatter_h3k4me1",
+                              figure_save_path=paste0(config$paths$test_results_dump, "diffbind_figures"),
                               width = 8,
                               height = 6,
                               regression = TRUE)
 
-make_scatter_plot_from_merged(allDBsitepath = "/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/allDB_sites.bed",
-                              RNAfilepath="/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
-                              sigsitespath="/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/sig_sites.bed",
-                              filepath=paste0(config$paths$test_results_dump, "diffbind_files"),
-                              BULK_FDR_CUTOFF=1,
+make_scatter_plot_from_merged(sigsites_merged_data,
                               figure_title ="DB sites log2FC vs Nearby Gene RNAseq log2FC",
-                              filename="db_bulk_scatter",
-                              figure_path=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                              file_name="db_bulk_scatter_no_regression_line_h3k4me1",
+                              figure_save_path=paste0(config$paths$test_results_dump, "diffbind_figures"),
                               width = 8,
                               height = 6,
                               regression = FALSE)
