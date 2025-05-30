@@ -7,7 +7,7 @@ It returns nothing
 save_diffbind_object(dba_object, file_suffix, dbaobj_save_path) saves the
 DBA object under the specified file path.}
 \usage{
-save_diffbind_object(dba_object, file_suffix = NULL, dbaobj_save_path = NULL)
+save_diffbind_object(dba_object, file_suffix, dbaobj_save_path = NULL)
 }
 \arguments{
 \item{dba_object}{DBA object obtained after \code{perform_diffbind()}.}

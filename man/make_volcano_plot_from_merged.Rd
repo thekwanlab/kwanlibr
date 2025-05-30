@@ -9,15 +9,15 @@ make_volcano_plot_from_merged(
   figure_title,
   figure_save_path,
   file_name,
-  color,
   xdiff = 5,
   ymax = 40,
-  size = 1,
-  alpha = 1,
+  point_size = 1,
+  point_alpha = 1,
   width = 8,
   height = 6,
-  contrast_number = 1,
-  bulk_fdr_cutoff = 0.05
+  DB_fdr_cutoff = 0.05,
+  DE_fdr_cutoff = 0.05,
+  color = c("steelblue", "tomato")
 )
 }
 \arguments{
@@ -29,44 +29,41 @@ make_volcano_plot_from_merged(
 
 \item{file_name}{Character. Output figure file_name (e.g., "volcano.png").}
 
-\item{color}{Character vector of length 3, in order of background color, down FC color,
-and up FC color. E.x. \code{c('grey','steelblue', 'tomato')}.}
-
 \item{xdiff}{Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is \code{5}.}
 
 \item{ymax}{Numeric. Limits the y-axis range to \code{[0, ymax]}. Default is \code{40}.}
 
-\item{size}{Numeric. Point size in the plot. Default is \code{1}.}
+\item{point_size}{Numeric. Point size in the plot. Default is \code{1}.}
 
-\item{alpha}{Numeric. Transparency level of the points. Ranges from 0 (fully
+\item{point_alpha}{Numeric. Transparency level of the points. Ranges from 0 (fully
 transparent) to 1 (fully opaque). Default is \code{1}.}
 
 \item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
 
 \item{height}{Numeric. Height dimensions of saved plot in inches. Default is 6.}
 
-\item{contrast_number}{Integer. Index indicating which contrast to extract from
-the DBA object. Defeault is set to \code{1}.}
+\item{DB_fdr_cutoff}{Numeric. Significance threshold for FDR in differential binding
+dataframe. Default is 0.05.}
 
-\item{bulk_fdr_cutoff}{Numeric. Significance threshold for RNA-seq differential expression.
-Defualt is 0.05.}
+\item{DE_fdr_cutoff}{Numeric. Significance threshold for FDR in RNA-seq differential
+expression. Defualt is 0.05.}
+
+\item{color}{Character vector of length 2, in order of down FC color, then up FC
+color. default is set to \code{c('steelblue', 'tomato')}.}
 }
 \value{
 A ggplot object of DB and DE merged volcano plot
 }
 \description{
 make_volcano_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
-color, xdiff, ymax, size, alpha, width, height, contrast_number, bulk_fdr_cutoff)
-merges differential binding (DB) sites with RNA-seq differential expression (DE)
-data using \code{merge_sites_with_exp()}, then creates a volcano plot. All sites
-are shown in gray; DB sites mapped to significant DE genes are colored by direction
-of bulk logFC (Up/Down).
+xdiff, ymax, point_size, point_alpha, width, height, DB_fdr_cutoff, DE_fdr_cutoff,
+color) creates a volcano plot based on merged DB and DE data. All sites are shown in
+gray; DB sites mapped to significant DE genes are colored by direction of DE logFC (Up/Down).
 }
 \examples{
 make_volcano_plot_from_merged(
   merged_df = merged_volcano,
   figure_title = 'cKO vs cHet Differential Binding sites',
   figure_save_path = "diffbind_figures",
-  file_name = "db_volcano_bulk_color_binary",
-  color = c('grey','steelblue', 'tomato'))
+  file_name = "db_volcano_DE_color_binary")
 }

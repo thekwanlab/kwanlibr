@@ -11,6 +11,7 @@ make_density_plot(
   fdr_threshold = 1,
   figure_save_path = NULL,
   contrast_number = 1,
+  x_lim = c(-1, 1),
   width = 8,
   height = 6,
   color = "aquamarine4"
@@ -23,13 +24,15 @@ make_density_plot(
 
 \item{file_name}{Character. Base name used for saving the plot files.}
 
-\item{fdr_threshold}{Numeric. FDR cutoff for significance (Default is 1).}
+\item{fdr_threshold}{Numeric. FDR cutoff for DB significance (Default is 1).}
 
 \item{figure_save_path}{Character. Directory path where the plot files will be saved.
 Default is set to \code{NULL}.}
 
 \item{contrast_number}{Integer. Index indicating which contrast to extract from the
 DBA object. Defeault is set to \code{1}.}
+
+\item{x_lim}{Numeric. The vector that contains limit for x axis, by default, it is \code{c(-1, 1)}.}
 
 \item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
 

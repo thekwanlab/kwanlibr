@@ -20,6 +20,7 @@
 #' @import latex2exp
 #' @import gtools
 #' @import tibble
+#' @import assertions
 
 #---------------------
 # Functions
@@ -104,16 +105,19 @@ perform_diffbind <- function(
   dba.obj.count <- DiffBind::dba.count(dba.obj.blacklist, summits = TRUE)
   dba.obj.normalize <- DiffBind::dba.normalize(dba.obj.count, normalize = normalization)
 
-  if (min_members == 2){
+  if (is.null(min_members)) {
     dba.obj.contrast <- DiffBind::dba.contrast(dba.obj.normalize,
-                                              minMembers = min_members,
-                                              reorderMeta = list(Condition = control_level))
-  } else if (is.null(min_members)) {
+                                               reorderMeta = list(Condition = control_level))
+  } else {
     dba.obj.contrast <- DiffBind::dba.contrast(dba.obj.normalize,
-                                              reorderMeta = list(Condition = control_level))
+                                               minMembers = min_members,
+                                               reorderMeta = list(Condition = control_level))
   }
 
   dba.obj <- DiffBind::dba.analyze(dba.obj.contrast)
+
+  message("DiffBind analysis completed successfully.")
+
   return(dba.obj)
 }
 
@@ -136,21 +140,15 @@ perform_diffbind <- function(
 
 save_diffbind_object <- function(
     dba_object,
-    file_suffix = NULL,
+    file_suffix,
     dbaobj_save_path = NULL
 ){
-  if (is.null(file_suffix)){
-    stop("'file_suffix' is required to uniquely identify the saved RDS file.")
-  }
   if (is.null(dbaobj_save_path)) {
     dbaobj_save_path <- getwd()
   }
 
   #Save the DBA object
   saveRDS(dba_object, file=file.path(dbaobj_save_path, paste0("dba_obj_", file_suffix, ".RDS")))
-
-  message("DiffBind analysis completed successfully. Results saved to:",
-          file.path(dbaobj_save_path, paste0("dba_obj_", file_suffix, ".RDS")))
 }
 
 #' Retrieve Differentially Bind Sites from a DBA object
@@ -178,19 +176,16 @@ get_DBsites <- function(
     stop("Invalid contrast_number. Please provide a valid contrast index.")
   }
 
-  sites <- as.data.frame(dba.report(dba_object, contrast = contrast_number, th = 1))
+  sites <- as.data.frame(dba.report(dba_object, contrast = contrast_number, th = fdr_threshold))
 
   if (is.null(sites)) {
     stop("No sites found in the report. Please check your contrast setup.")
   }
 
-  #filter sites
-  filtered.sites <- sites %>% filter(FDR <= fdr_threshold)
+  print(paste('Positive logFC:', sum(sites$Fold > 0)))
+  print(paste('Negative logFC:', sum(sites$Fold < 0)))
 
-  print(paste('Positive logFC:', sum(filtered.sites$Fold > 0)))
-  print(paste('Negative logFC:', sum(filtered.sites$Fold < 0)))
-
-  return(filtered.sites)
+  return(sites)
 }
 
 #' save different sites files
@@ -275,18 +270,19 @@ save_sites <- function(
 #' Create and save a density plot
 #'
 #' make_density_plot(dba_object, figure_title, file_name, fdr_threshold, figure_save_path,
-#' contrast_number, width, height, color) creates a density plot from a DBA object
+#' contrast_number, x_lim, width, height, color) creates a density plot from a DBA object
 #' with specified figure title and saves it in pdf and png format under the designated
 #' file path.
 #'
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
 #' @param figure_title Character. Title for density plot.
 #' @param file_name Character. Base name used for saving the plot files.
-#' @param fdr_threshold Numeric. FDR cutoff for significance (Default is 1).
+#' @param fdr_threshold Numeric. FDR cutoff for DB significance (Default is 1).
 #' @param figure_save_path Character. Directory path where the plot files will be saved.
 #' Default is set to \code{NULL}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
 #' DBA object. Defeault is set to \code{1}.
+#' @param x_lim Numeric. The vector that contains limit for x axis, by default, it is \code{c(-1, 1)}.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
 #' @param color Character. Color to fill the density plot. Default is \code{"aquamarine4"}.
@@ -307,15 +303,23 @@ make_density_plot <- function(
     fdr_threshold = 1,
     figure_save_path=NULL,
     contrast_number=1,
+    x_lim=c(-1, 1),
     width=8,
     height=6,
     color='aquamarine4'
 ){
-  if (is.null(figure_save_path)) {
-    figure_save_path <- getwd()
-  }
   if (is.null(file_name)) {
     stop("A valid file name is required to be specified.")
+  }
+
+  #strip off extensions in the filename
+  if (tools::file_ext(file_name) != "") {
+    file_name <- tools::file_path_sans_ext(file_name)
+    warning("file name should not include any extensions, file name changed to: ", file_name)
+  }
+
+  if (is.null(figure_save_path)) {
+    figure_save_path <- getwd()
   }
 
   sites <- get_DBsites(dba_object = dba_object,
@@ -326,9 +330,8 @@ make_density_plot <- function(
   p <- sites %>%
     ggplot(aes(x=Fold)) +
     geom_density(aes(y=after_stat(count)), fill=color) +
-    labs(x = TeX('$\\log_2$ FC'),
-         title = TeX(paste0(figure_title,
-                            ' [ FDR < ', fdr_threshold, ' ]')))
+    xlim(x_lim) +
+    labs(x = TeX('$\\log_2$ FC'), title = figure_title)
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
@@ -346,7 +349,7 @@ make_density_plot <- function(
 #' Create and save a PCA plot
 #'
 #' make_PCA_plot_diffbind(dba_object, figure_title_nocontrast, figure_title_contrast,
-#' figure_save_path, file_name, size, width, height, color) Creates side-by-side PCA
+#' figure_save_path, file_name, point_size, width, height, color) Creates side-by-side PCA
 #' plots to compare the variance structure of all consensus binding regions vs differentially
 #' bound (DB) regions from a DBA object. Both plots are saved as PNG and PDF files under
 #' designated file path.
@@ -358,7 +361,7 @@ make_density_plot <- function(
 #' bound regions.
 #' @param figure_save_path Character. Directory path where output plots will be saved.
 #' @param file_name Character. Base name (without extension) for the saved plot files.
-#' @param size Numeric. Size of the points, default is set to 8.
+#' @param point_size Numeric. Size of the points, default is set to 8.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 20.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 9.
 #' @param color Character vector of length 2. Colors to use for the two biological conditions
@@ -381,13 +384,23 @@ make_PCA_plot_diffbind <- function(
     figure_title_contrast,
     figure_save_path,
     file_name,
-    size=8,
+    point_size=8,
     width=20,
     height=9,
     color=c('darkmagenta','aquamarine4')
 ){
+  #strip off extensions in the filename
+  if (tools::file_ext(file_name) != "") {
+    file_name <- tools::file_path_sans_ext(file_name)
+    warning("file name should not include any extensions, file name changed to: ", file_name)
+  }
+
   if (is.null(figure_save_path)) {
     figure_save_path = getwd()
+  }
+
+  if (length(color) != 2) {
+    stop("There should be 2 color choices.")
   }
 
   # For all consensus regions:
@@ -398,7 +411,7 @@ make_PCA_plot_diffbind <- function(
   sum_pc_nocontrast <- sum(PoV_nocontrast_rank[1:2])
   legend_label <- paste0("Sum of variance of 2 PCs: ", sum_pc_nocontrast)
   p1 <- kwanlibr::draw_PCA(df_nocontrast, label=df_label, color=color) +
-    geom_point(size = size) +
+    geom_point(size = point_size) +
     labs(caption = legend_label) +
     ggtitle(figure_title_nocontrast) +
     theme(aspect.ratio = 1) +
@@ -412,7 +425,7 @@ make_PCA_plot_diffbind <- function(
   sum_pc_contrast <- sum(PoV_contrast_rank[1:2])
   legend_label <- paste0("Sum of variance of 2 PCs: ", sum_pc_contrast)
   p2 <- kwanlibr::draw_PCA(df_contrast, label = df_label, color=color) +
-    geom_point(size = size) +
+    geom_point(size = point_size) +
     labs(caption = legend_label) +
     ggtitle(figure_title_contrast) +
     theme(aspect.ratio = 1) +
@@ -431,6 +444,7 @@ make_PCA_plot_diffbind <- function(
   message("PCA Plot is generated successfully. Results saved to: \n",
           file.path(figure_save_path, paste0(file_name ,'.png')), " and \n",
           file.path(figure_save_path, paste0(file_name ,'.pdf')))
+
   return(p)
 }
 
@@ -439,6 +453,7 @@ make_PCA_plot_diffbind <- function(
 #' make_volcano_sites(dba_object, contrast_number, fdr_threshold, xdiff, ymax) makes
 #' volcano-plottable table and applies filtering based on FDR threshold and clamps
 #' values.
+#'
 #' @param dba_object DBA object (RDS format) generated by \code{perform_diffbind()}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
 #' DBA object. Defeault is set to \code{1}.
@@ -457,10 +472,11 @@ make_volcano_sites <- function(
     xdiff=5,
     ymax=40
 ){
+  print("For all sites:")
   sites <- get_DBsites(dba_object,
                       fdr_threshold = 1,
                       contrast_number = contrast_number)
-
+  print("For significant sites:")
   sig.sites <- get_DBsites(dba_object,
                           fdr_threshold = fdr_threshold,
                           contrast_number = contrast_number)
@@ -482,18 +498,18 @@ make_volcano_sites <- function(
 
 #' Create and save a volcano plot
 #'
-#' make_volcano_plot_diffbind(dba_object, figure_title, figure_save_path, file_name,
-#' size, alpha, width, height, xdiff, ymax, contrast_number, fdr_threshold, color)
+#' make_volcano_plot_diffbind(dba_object, figure_title, file_name, figure_save_path,
+#' point_size, point_alpha, width, height, xdiff, ymax, contrast_number, fdr_threshold, color)
 #' generates volcano plot and returns the ggplot object and it also saves the file
 #' under the designated figure file path.
 #'
 #' @param dba_object DBA object (RDS format) generated by \code{perform_diffbind()}.
 #' @param figure_title Character. Figure title for volcano plot, ex. "h3k27me3 cKO vs cHET"
+#' @param file_name Character. Base name for the output volcano plot figures.
 #' @param figure_save_path Character. Directory path where the output plots will
 #' be saved. Default is \code{NULL}.
-#' @param file_name Character. Base name for the output volcano plot figures.
-#' @param size Numeric. Size of the points in volcano plots, default is set to 1.
-#' @param alpha Numeric. Transparency level of the points. Ranges from 0 (fully
+#' @param point_size Numeric. Size of the points in volcano plots, default is set to 1.
+#' @param point_alpha Numeric. Transparency level of the points. Ranges from 0 (fully
 #' transparent) to 1 (fully opaque). Default is \code{1}.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
@@ -502,7 +518,8 @@ make_volcano_sites <- function(
 #' @param contrast_number Integer. Index indicating which contrast to extract from
 #' the DBA object. Defeault is set to \code{1}.
 #' @param fdr_threshold Numeric. The FDR threshold used for grouping, default is \code{0.05}.
-#' @param color Character vector of length 2. By default the color is \code{c('aquamarine4', 'grey')}
+#' @param color Character vector of length 2. One for insignificant DB sites, one for significant
+#' DB sites. Usually 'grey' is for insignificant sites. By default, it is \code{c('aquamarine4', 'grey')}
 #' @return A ggplot object of volcano plot
 #' @keywords volcano plot
 #' @export
@@ -516,10 +533,10 @@ make_volcano_sites <- function(
 make_volcano_plot_diffbind <- function(
     dba_object,
     figure_title,
-    figure_save_path=NULL,
     file_name,
-    size=1,
-    alpha=1,
+    figure_save_path=NULL,
+    point_size=1,
+    point_alpha=1,
     width=8,
     height=6,
     xdiff=5,
@@ -528,33 +545,34 @@ make_volcano_plot_diffbind <- function(
     fdr_threshold=0.05,
     color=c('aquamarine4', 'grey')
 ){
+  #strip off extensions in the filename
+  if (tools::file_ext(file_name) != "") {
+    file_name <- tools::file_path_sans_ext(file_name)
+    warning("file name should not include any extensions, file name changed to: ", file_name)
+  }
+
   if (is.null(figure_save_path)) {
     figure_save_path = getwd()
   }
 
+  if (length(color) != 2) {
+    stop("There should be 2 color choices.")
+  }
+
   volcano.sites <- make_volcano_sites(dba.obj,
+                                      contrast_number = contrast_number,
+                                      fdr_threshold = fdr_threshold,
                                       xdiff = xdiff,
                                       ymax = ymax)
 
-  sig.sites <- get_DBsites(dba_object = dba_object,
-                           fdr_threshold = fdr_threshold,
-                           contrast_number = contrast_number)
-
-  p <-draw_volcano_general(volcano.sites,
-                           criteria="FDR",
-                           colors = setNames(c(color[1], color[2]),
-                                             c(paste('<=', fdr_threshold),
-                                               paste('>', fdr_threshold))),
-                           size=size,
-                           alpha=alpha,
-                           xdiff = xdiff,
-                           ymax = ymax)
-
-  figure_title <- paste0(figure_title, " [", dim(sig.sites)[1], ' DB Regions FDR <= ',
-                  fdr_threshold,
-                  ']')
-
-  p <- p + labs(title = figure_title)
+  p <- ggplot(data = volcano.sites, aes(x = Fold, y = negLogFDR, color = FDR)) +
+    geom_point(size = point_size, alpha = point_alpha) +
+    scale_color_manual(values = color) +
+    xlim(-xdiff, xdiff) +
+    ylim(0, ymax) +
+    labs(x = TeX('$\\log_2$ FC'),
+         y = TeX('$-\\log_{10}$ FDR'),
+         title = figure_title)
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
@@ -566,30 +584,27 @@ make_volcano_plot_diffbind <- function(
   message("Volcano Plot is generated successfully. Results saved to: \n",
           file.path(figure_save_path, paste0(file_name ,'.png')), " and \n",
           file.path(figure_save_path, paste0(file_name ,'.pdf')))
+
   return(p)
 }
 
 #' Merge Differential Binding and Expression Data
 #'
-#' merge_sites_with_exp(dba_object, RNAfile_path, join_data_sites, save_path, contrast_number,
-#' fdr_threshold, bulk_fdr_cutoff) integrates differential binding sites with differential
-#' expression data (from bulk RNA-seq) by joining them based on their nearest gene TSS and
-#' returns a data frame where each row represents a differential binding site along with its
-#' nearest gene's differential expression.
+#' merge_sites_with_exp(dba_object, DE_file_path, tss_file_path, save_path, contrast_number)
+#' integrates differential binding sites with differential expression data (from bulk RNA-seq)
+#' by joining them based on their nearest gene TSS and returns a data frame where each row
+#' represents a differential binding site along with its nearest gene's differential expression.
 #'
 #' @param dba_object DBA object (RDS format) generated by \code{perform_diffbind()}.
-#' @param RNAfile_path Character. Path to the CSV file containing bulk RNA-seq differential
+#' @param DE_file_path Character. Path to the CSV file containing bulk RNA-seq differential
 #' expression results. This file must include the columns \code{gene_name}, \code{logFC},
 #' and \code{FDR}.
-#' @param join_data_sites dataframe (e.g., volcano_sites) to be merged with DE data.
+#' @param tss_file_path Character. Transcription Start Site file path to be used in annotation
+#' with Differential binding sites.
 #' @param save_path Character. Directory path for storing intermediate files, including the TSS
 #' BED file, sorted BED file, and nearest gene lookup TSV.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
 #' DBA object. Defeault is set to \code{1}.
-#' @param fdr_threshold Numeric. Significance threshold for FDR in differential binding dataframe.
-#' Default is 0.05.
-#' @param bulk_fdr_cutoff Numeric. Significance threshold for RNA-seq differential expression.
-#' Defualt is 0.05.
 #' @return A data frame containing merged binding and expression data. Each row corresponds to
 #' a binding site and includes:
 #' \itemize{
@@ -602,31 +617,43 @@ make_volcano_plot_diffbind <- function(
 #' @examples
 #' merge_sites_with_exp(
 #'   dba_object = dba.obj,
-#'   RNAfile_path = "path_to_RNAseq_csv_file",
-#'   join_data_sites = volcano.sites,
+#'   DE_file_path = path_to_DE_csv_file,
+#'   tss_file_path = path_to_tss_file,
 #'   save_path = "diffbind_files")
 
 merge_sites_with_exp <- function(
     dba_object,
-    RNAfile_path,
-    join_data_sites,
+    DE_file_path,
+    tss_file_path,
     save_path,
-    contrast_number=1,
-    fdr_threshold=0.05,
-    bulk_fdr_cutoff=0.05
+    contrast_number=1
 ){
-  if (is.null(RNAfile_path) || !file.exists(RNAfile_path)) {
-    stop("`RNAfile_path` must be a valid path to the RNA-seq results CSV file.")
+  if (is.null(DE_file_path) || !file.exists(DE_file_path)) {
+    stop("`DE_file_path` must be a valid path to the RNA-seq results CSV file.")
   }
+
+  if (!file.exists(tss_file_path)) {
+    stop("`tss_file_path` must be a valid path to the TSS BED file.")
+  }
+
+  #check if DE file has required column
+  DE = read.csv(DE_file_path)
+  required_cols <- c("gene_name", "logFC", "FDR")
+  missing_cols <- setdiff(required_cols, colnames(DE))
+  if (length(missing_cols) > 0) {
+    stop("The DE file is missing required column(s): ",
+         paste(missing_cols, collapse = ", "))
+  }
+
   if (!dir.exists(save_path)) {
     dir.create(save_path, recursive = TRUE)
   }
 
-  sig.sites <- get_DBsites(dba_object = dba_object,
-                           fdr_threshold = fdr_threshold,
-                           contrast_number = contrast_number)
+  sites <- get_DBsites(dba_object = dba_object,
+                       fdr_threshold = 1,
+                       contrast_number = contrast_number)
 
-  allDB.sites = sig.sites %>%
+  allDB.sites = sites %>%
     mutate(Score = -log10(FDR)) %>%
     tibble::rownames_to_column('site.id') %>%
     select(Chr, Start, End, site.id, Score)
@@ -635,63 +662,68 @@ merge_sites_with_exp <- function(
               quote = FALSE, sep = '\t',
               row.names = FALSE, col.names = FALSE)
 
-  # run bash script to retrieve the nearest gene ID
-  allDBsite_path <- file.path(save_path, "allDB_sites.bed")
-  tss_bed <- file.path(save_path, "TSS.bed")
-  sorted_bed <- file.path(save_path, "allDB_sites.sorted.bed")
+  # run bash commands to retrieve the nearest gene ID
+  allDB_bed <- file.path(save_path, "allDB_sites.bed")
   lookup_tsv <- file.path(save_path, "DB_site_nearest_gene_lookup.tsv")
+  sorted_bed <- tempfile(pattern = "sorted_allDB_sites_", fileext = ".bed")
 
-  script <- system.file("scripts", "db_annotate_regions.sh", package = "kwanlibr")
-  if (script == "") stop("Annotation script not found in kwanlibr package.")
-  system2("bash", args = c(script, allDBsite_path, tss_bed, sorted_bed, lookup_tsv))
+  cmd <- sprintf(
+    'module load Bioinformatics bedops/2.4.41 && sort-bed %s > %s && closest-features --closest --delim "\t" %s %s | awk \'{ print $4, $9 }\' > %s',
+    shQuote(allDB_bed),
+    shQuote(sorted_bed),
+    shQuote(sorted_bed),
+    shQuote(tss_file_path),
+    shQuote(lookup_tsv)
+  )
+  system2("bash", args = c("-l", "-c", cmd))
 
   # read the annotated gene expression RNA sequencing file
-  db.site.gene.lookup = read.table(lookup_tsv, col.names = c('site.id','gene_name'))
-  bulk.DE = read.csv(RNAfile_path) %>% distinct(gene_name, .keep_all = TRUE)
+  db_site_gene_lookup = read.table(lookup_tsv,
+                                   fill = TRUE,
+                                   col.names = c('site.id','gene_name'))
+
+  DE = DE %>% distinct(gene_name, .keep_all = TRUE)
 
   # inner join sites and the diff expressed data
-  db.site.bulk.data = db.site.gene.lookup %>%
-    inner_join(bulk.DE, by = 'gene_name') %>%
+  db_site_DE_data = db_site_gene_lookup %>%
+    inner_join(DE, by = 'gene_name') %>%
     select(site.id, gene_name, logFC, FDR) %>%
     dplyr::rename(bulk.logFC = logFC) %>%
     dplyr::rename(bulk.FDR = FDR)
 
-  db.site.bulk.data.meets.FDR = db.site.bulk.data %>% filter(bulk.FDR < bulk_fdr_cutoff)
-
-  data.sites.bulk.color = join_data_sites %>%
+  full_sites_and_DE_data = sites %>%
     tibble::rownames_to_column('site.id') %>%
     mutate(site.id = as.numeric(site.id)) %>%
-    left_join(db.site.bulk.data.meets.FDR, by = 'site.id')
+    left_join(db_site_DE_data, by = 'site.id')
 
-  return(data.sites.bulk.color)
+  return(full_sites_and_DE_data)
 }
 
 #' Make Volcano Plot from DB and DE Data (Color by bulk logFC direction)
 #'
 #' make_volcano_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
-#' color, xdiff, ymax, size, alpha, width, height, contrast_number, bulk_fdr_cutoff)
-#' merges differential binding (DB) sites with RNA-seq differential expression (DE)
-#' data using \code{merge_sites_with_exp()}, then creates a volcano plot. All sites
+#' xdiff, ymax, point_size, point_alpha, width, height, DB_fdr_cutoff, DE_fdr_cutoff,
+#' color) creates and saves a volcano plot based on merged DB and DE data. All sites
 #' are shown in gray; DB sites mapped to significant DE genes are colored by direction
-#' of bulk logFC (Up/Down).
+#' of DE logFC (Up/Down).
 #'
 #' @param merged_df Merged data generated from running \code{merge_sites_with_exp()}
 #' @param figure_title Character. The title of the volcano plot.
 #' @param figure_save_path Character. The path to save the volcano plot.
 #' @param file_name Character. Output figure file_name (e.g., "volcano.png").
-#' @param color Character vector of length 3, in order of background color, down FC color,
-#' and up FC color. E.x. \code{c('grey','steelblue', 'tomato')}.
 #' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is \code{5}.
 #' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}. Default is \code{40}.
-#' @param size Numeric. Point size in the plot. Default is \code{1}.
-#' @param alpha Numeric. Transparency level of the points. Ranges from 0 (fully
+#' @param point_size Numeric. Point size in the plot. Default is \code{1}.
+#' @param point_alpha Numeric. Transparency level of the points. Ranges from 0 (fully
 #' transparent) to 1 (fully opaque). Default is \code{1}.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
-#' @param contrast_number Integer. Index indicating which contrast to extract from
-#' the DBA object. Defeault is set to \code{1}.
-#' @param bulk_fdr_cutoff Numeric. Significance threshold for RNA-seq differential expression.
-#' Defualt is 0.05.
+#' @param DB_fdr_cutoff Numeric. Significance threshold for FDR in differential binding
+#' dataframe. Default is 0.05.
+#' @param DE_fdr_cutoff Numeric. Significance threshold for FDR in RNA-seq differential
+#' expression. Defualt is 0.05.
+#' @param color Character vector of length 2, in order of down FC color, then up FC
+#' color. default is set to \code{c('steelblue', 'tomato')}.
 #' @return A ggplot object of DB and DE merged volcano plot
 #' @export
 #' @examples
@@ -699,60 +731,74 @@ merge_sites_with_exp <- function(
 #'   merged_df = merged_volcano,
 #'   figure_title = 'cKO vs cHet Differential Binding sites',
 #'   figure_save_path = "diffbind_figures",
-#'   file_name = "db_volcano_bulk_color_binary",
-#'   color = c('grey','steelblue', 'tomato'))
+#'   file_name = "db_volcano_DE_color_binary")
 
 make_volcano_plot_from_merged <- function(
     merged_df,
     figure_title,
     figure_save_path,
     file_name,
-    color,
     xdiff=5,
     ymax=40,
-    size=1,
-    alpha=1,
+    point_size=1,
+    point_alpha=1,
     width = 8,
     height = 6,
-    contrast_number=1,
-    bulk_fdr_cutoff=0.05
+    DB_fdr_cutoff=0.05,
+    DE_fdr_cutoff=0.05,
+    color=c("steelblue", "tomato")
 ){
+  # Check for required columns
+  required_cols <- c("Fold", "FDR", "bulk.FDR", "bulk.logFC")
+  missing_cols <- setdiff(required_cols, colnames(merged_df))
+  if (length(missing_cols) > 0) {
+    stop("The merged data is missing required column(s): ",
+         paste(missing_cols, collapse = ", "))
+  }
+
+  #strip off extensions in the filename
+  if (tools::file_ext(file_name) != "") {
+    file_name <- tools::file_path_sans_ext(file_name)
+    warning("file name should not include any extensions, file name changed to: ", file_name)
+  }
+
+  if (length(color) != 2) {
+    stop("There should be 2 color choices.")
+  }
+
+  #filtering by FDR
+  sig_merged_df <- merged_df %>% filter(FDR < DB_fdr_cutoff)
+
+  downsampled_nonsig_merged_df <- merged_df %>%
+    filter(FDR > DB_fdr_cutoff) %>%
+    sample_frac(1, replace = FALSE)
+
+  volcano_merged_df <- sig_merged_df %>% bind_rows(downsampled_nonsig_merged_df)
+  volcano_merged_df <- merged_df %>% mutate(negLogFDR = -log10(FDR))
+
   # Add criteria column
-  merged_df <- merged_df %>%
-    mutate(
-      bulk.logFC.direction = case_when(
-        !is.na(bulk.FDR) & bulk.FDR < bulk_fdr_cutoff & bulk.logFC > 0 ~ "Up",
-        !is.na(bulk.FDR) & bulk.FDR < bulk_fdr_cutoff & bulk.logFC < 0 ~ "Down",
-        TRUE ~ "NM"),  # Not Matched
-      # Set explicit factor levels to control draw order (NS first)
-      bulk.logFC.direction = factor(bulk.logFC.direction, levels = c("NM", "Down", "Up"))
-    )
+  volcano_DE_groups <- volcano_merged_df %>%
+    filter(FDR < DB_fdr_cutoff) %>%
+    filter(bulk.FDR < DE_fdr_cutoff) %>%
+    mutate(bulk.logFC.direction = if_else(bulk.logFC > 0, 'Up', 'Down'))
 
-  # Plot
-  p <- draw_volcano_general(
-    data = merged_df,
-    colors = setNames(c(color[1], color[2], color[3]), c("NM", "Down", "Up")),
-    criteria = "bulk.logFC.direction",
-    size = size,
-    alpha = alpha,
-    xdiff = xdiff,
-    ymax = ymax
-  )
-
-  # Add titles etc
-  p <- p +
-    # exclude "NM" in legend, keep only "down" and "up"
-    scale_color_manual(name = "bulkRNAseq FC",
-                       values = setNames(c(color[1], color[2], color[3]), c("NM", "Down", "Up")),
-                       breaks = c("Down", "Up")) +
+  p <- ggplot() +
+    geom_point(data = volcano_merged_df,
+               aes(x=Fold, y=negLogFDR),
+               size = 1,
+               alpha = 1,
+               color = 'grey') +
+    geom_point(data = volcano_DE_groups,
+               aes(x=Fold, y=negLogFDR, col=bulk.logFC.direction),
+               size = point_size,
+               alpha = point_alpha) +
+    scale_colour_manual(values = color, na.value='grey') +
     xlim(-xdiff, xdiff) +
     ylim(0, ymax) +
-    labs(title = paste0(figure_title,
-                        '\n[ color by nearest TSS bulkRNAseq logFC, filtered by bulkRNAseq FDR < ',
-                        bulk_fdr_cutoff, ' ]'),
-         color = "bulk RNA-seq FC",
-         x = TeX('$\\log_2$( differential binding FC )'),
-         y = TeX('$-\\log_{10}$( differential binding FDR )'))
+    labs(x = TeX('$\\log_2$( differential binding FC )'),
+         y = TeX('$-\\log_{10}$( differential binding FDR )'),
+         colour = 'bulkRNAseq FC',
+         title = figure_title)
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
@@ -767,9 +813,9 @@ make_volcano_plot_from_merged <- function(
 #' Create and save the scattor plot from DB and DE Data
 #'
 #' make_scatter_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
-#' width, height, size, regression, contrast_number, point_color, line_color) create
-#' scatter plot from merged differential binding sites with differential expression
-#' data and save the plot under designated directory.
+#' width, height, point_size, regression, DB_fdr_cutoff, DE_fdr_cutoff, point_color,
+#' line_color) create and saves scatter plot from merged DB and DE data and save the
+#' plot under designated directory.
 #'
 #' @param merged_df Merged data generated from running \code{merge_sites_with_exp()}
 #' @param figure_title Character. The scatter plot title.
@@ -777,21 +823,25 @@ make_volcano_plot_from_merged <- function(
 #' @param file_name Character. The base name of the scatter plot file.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
-#' @param size Numeric. The size of the point in scatter plot. Default is 1.
+#' @param point_size Numeric. The size of the point in scatter plot. Default is 1.
 #' @param regression logical value. Default is set to 'TRUE', a regression line is
 #' drawn to the scatter plot. otherwise no regression line.
-#' @param contrast_number Integer. Index indicating which contrast to extract from
-#' the DBA object. Defeault is set to \code{1}.
+#' @param DB_fdr_cutoff Numeric. Significance threshold for FDR in differential binding
+#' dataframe. Default is 0.05.
+#' @param DE_fdr_cutoff Numeric. Significance threshold for FDR in RNA-seq differential
+#' expression. Defualt is 0.05.
 #' @param point_color Character Value. The color of the point. Default is \code{'black'}.
 #' @param line_color Character Value. The color of the regression line. Default is
 #' \code{'aquamarine4'}.
+#' @import tools
+#' @return ggplot object of scatter plot
 #' @export
 #' @examples
 #' make_scatter_plot_from_merged(
-#'   merged_df = merged_sigsites,
+#'   merged_df = merged_df,
 #'   figure_title = "DB vs DE log2FC",
 #'   figure_save_path = "diffbind_figures",
-#'   file_name = "db_bulk_scatter")
+#'   file_name = "db_DE_scatter")
 
 make_scatter_plot_from_merged <- function(
     merged_df,
@@ -800,39 +850,58 @@ make_scatter_plot_from_merged <- function(
     file_name,
     width=8,
     height=6,
-    size=1,
+    point_size=1,
     regression=TRUE,
-    contrast_number=1,
+    DB_fdr_cutoff=0.05,
+    DE_fdr_cutoff=1,
     point_color='black',
     line_color='aquamarine4'
 ){
-  # exclude rows with NA Values in any column
-  merged_df <- merged_df %>% na.omit()
+  # Check for required columns
+  required_cols <- c("Fold", "FDR", "bulk.FDR", "bulk.logFC")
+  missing_cols <- setdiff(required_cols, colnames(merged_df))
+  if (length(missing_cols) > 0) {
+    stop("The merged data is missing required column(s): ",
+         paste(missing_cols, collapse = ", "))
+  }
 
-  p <- merged_df %>%
-    ggplot(aes(x=Fold, y=bulk.logFC)) +
-    geom_point(color=point_color,
-               size=size)
+  #strip off extensions in the filename
+  if (tools::file_ext(file_name) != "") {
+    file_name <- tools::file_path_sans_ext(file_name)
+    warning("file name should not include any extensions, file name changed to: ", file_name)
+  }
+
+  # exclude rows with NA Values in any column
+  sig_merged_df <- merged_df %>%
+    na.omit() %>%
+    filter(FDR < DB_fdr_cutoff) %>%
+    filter(bulk.FDR < DE_fdr_cutoff)
+
+  p <- sig_merged_df %>%
+    ggplot(aes(x = Fold, y = bulk.logFC)) +
+    geom_point(color = point_color,
+               size = point_size)
 
   if (regression) {
-    db.bulk.scatter.regression = glm(bulk.logFC ~ Fold, data = merged_df)
-    beta = summary(db.bulk.scatter.regression)$coefficients['Fold', 1]
-    p.val = summary(db.bulk.scatter.regression)$coefficients['Fold', 4]
+    db.DE.scatter.regression = glm(bulk.logFC ~ Fold, data = sig_merged_df)
+    beta = summary(db.DE.scatter.regression)$coefficients['Fold', 1]
+    p.val = summary(db.DE.scatter.regression)$coefficients['Fold', 4]
     p <- p + geom_smooth(method = glm, color = line_color)+
       xlim(c(-1,1) * max(abs(merged_df$Fold))) +
       ylim(c(-1,1) * max(abs(merged_df$bulk.logFC))) +
       labs(x = TeX('Differential Binding Region $\\log_2$FC'),
            y = TeX('Nearby Gene RNAseq $\\log_2$FC'),
-           title = TeX(paste0(figure_title, " ",
-                              '$\\beta_{DB.region} =', round(beta, 2), '$,',
-                              '  p value = ', signif(p.val, digits=2))))
+           title = figure_title)
+
+    cat(paste0("beta = ", beta, "\np value = ", p.val, "\n"))
+
   } else {
     p <- p +
-      xlim(c(-1,1) * max(abs(merged_df$Fold))) +
-      ylim(c(-1,1) * max(abs(merged_df$bulk.logFC))) +
+      xlim(c(-1,1) * max(abs(sig_merged_df$Fold))) +
+      ylim(c(-1,1) * max(abs(sig_merged_df$bulk.logFC))) +
       labs(x = TeX('Differential Binding Region $\\log_2$FC'),
            y = TeX('Nearby Gene RNAseq $\\log_2$FC'),
-           title = TeX(paste0(figure_title)))
+           title = figure_title)
   }
 
   #save the plot

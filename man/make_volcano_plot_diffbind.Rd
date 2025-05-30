@@ -7,10 +7,10 @@
 make_volcano_plot_diffbind(
   dba_object,
   figure_title,
-  figure_save_path = NULL,
   file_name,
-  size = 1,
-  alpha = 1,
+  figure_save_path = NULL,
+  point_size = 1,
+  point_alpha = 1,
   width = 8,
   height = 6,
   xdiff = 5,
@@ -25,14 +25,14 @@ make_volcano_plot_diffbind(
 
 \item{figure_title}{Character. Figure title for volcano plot, ex. "h3k27me3 cKO vs cHET"}
 
+\item{file_name}{Character. Base name for the output volcano plot figures.}
+
 \item{figure_save_path}{Character. Directory path where the output plots will
 be saved. Default is \code{NULL}.}
 
-\item{file_name}{Character. Base name for the output volcano plot figures.}
+\item{point_size}{Numeric. Size of the points in volcano plots, default is set to 1.}
 
-\item{size}{Numeric. Size of the points in volcano plots, default is set to 1.}
-
-\item{alpha}{Numeric. Transparency level of the points. Ranges from 0 (fully
+\item{point_alpha}{Numeric. Transparency level of the points. Ranges from 0 (fully
 transparent) to 1 (fully opaque). Default is \code{1}.}
 
 \item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
@@ -48,14 +48,15 @@ the DBA object. Defeault is set to \code{1}.}
 
 \item{fdr_threshold}{Numeric. The FDR threshold used for grouping, default is \code{0.05}.}
 
-\item{color}{Character vector of length 2. By default the color is \code{c('aquamarine4', 'grey')}}
+\item{color}{Character vector of length 2. One for insignificant DB sites, one for significant
+DB sites. Usually 'grey' is for insignificant sites. By default, it is \code{c('aquamarine4', 'grey')}}
 }
 \value{
 A ggplot object of volcano plot
 }
 \description{
-make_volcano_plot_diffbind(dba_object, figure_title, figure_save_path, file_name,
-size, alpha, width, height, xdiff, ymax, contrast_number, fdr_threshold, color)
+make_volcano_plot_diffbind(dba_object, figure_title, file_name, figure_save_path,
+point_size, point_alpha, width, height, xdiff, ymax, contrast_number, fdr_threshold, color)
 generates volcano plot and returns the ggplot object and it also saves the file
 under the designated figure file path.
 }

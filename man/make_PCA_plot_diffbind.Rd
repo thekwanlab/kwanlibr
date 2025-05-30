@@ -10,7 +10,7 @@ make_PCA_plot_diffbind(
   figure_title_contrast,
   figure_save_path,
   file_name,
-  size = 8,
+  point_size = 8,
   width = 20,
   height = 9,
   color = c("darkmagenta", "aquamarine4")
@@ -29,7 +29,7 @@ bound regions.}
 
 \item{file_name}{Character. Base name (without extension) for the saved plot files.}
 
-\item{size}{Numeric. Size of the points, default is set to 8.}
+\item{point_size}{Numeric. Size of the points, default is set to 8.}
 
 \item{width}{Numeric. Width dimensions of saved plot in inches. Default is 20.}
 
@@ -43,7 +43,7 @@ A \code{gridExtra} object containing a side-by-side layout of two PCA plots.
 }
 \description{
 make_PCA_plot_diffbind(dba_object, figure_title_nocontrast, figure_title_contrast,
-figure_save_path, file_name, size, width, height, color) Creates side-by-side PCA
+figure_save_path, file_name, point_size, width, height, color) Creates side-by-side PCA
 plots to compare the variance structure of all consensus binding regions vs differentially
 bound (DB) regions from a DBA object. Both plots are saved as PNG and PDF files under
 designated file path.

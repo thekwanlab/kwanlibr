@@ -11,9 +11,10 @@ make_scatter_plot_from_merged(
   file_name,
   width = 8,
   height = 6,
-  size = 1,
+  point_size = 1,
   regression = TRUE,
-  contrast_number = 1,
+  DB_fdr_cutoff = 0.05,
+  DE_fdr_cutoff = 1,
   point_color = "black",
   line_color = "aquamarine4"
 )
@@ -31,29 +32,35 @@ make_scatter_plot_from_merged(
 
 \item{height}{Numeric. Height dimensions of saved plot in inches. Default is 6.}
 
-\item{size}{Numeric. The size of the point in scatter plot. Default is 1.}
+\item{point_size}{Numeric. The size of the point in scatter plot. Default is 1.}
 
 \item{regression}{logical value. Default is set to 'TRUE', a regression line is
 drawn to the scatter plot. otherwise no regression line.}
 
-\item{contrast_number}{Integer. Index indicating which contrast to extract from
-the DBA object. Defeault is set to \code{1}.}
+\item{DB_fdr_cutoff}{Numeric. Significance threshold for FDR in differential binding
+dataframe. Default is 0.05.}
+
+\item{DE_fdr_cutoff}{Numeric. Significance threshold for FDR in RNA-seq differential
+expression. Defualt is 0.05.}
 
 \item{point_color}{Character Value. The color of the point. Default is \code{'black'}.}
 
 \item{line_color}{Character Value. The color of the regression line. Default is
 \code{'aquamarine4'}.}
 }
+\value{
+ggplot object of scatter plot
+}
 \description{
 make_scatter_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
-width, height, size, regression, contrast_number, point_color, line_color) create
-scatter plot from merged differential binding sites with differential expression
-data and save the plot under designated directory.
+width, height, point_size, regression, DB_fdr_cutoff, DE_fdr_cutoff, point_color,
+line_color) create scatter plot from merged DB and DE data and save the plot under
+designated directory.
 }
 \examples{
 make_scatter_plot_from_merged(
   merged_df = merged_sigsites,
   figure_title = "DB vs DE log2FC",
   figure_save_path = "diffbind_figures",
-  file_name = "db_bulk_scatter")
+  file_name = "db_DE_scatter")
 }
