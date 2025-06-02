@@ -20,7 +20,7 @@ make_scatter_plot_from_merged(
 )
 }
 \arguments{
-\item{merged_df}{Merged data generated from running \code{merge_sites_with_exp()}}
+\item{merged_df}{Merged data generated from running \code{merge_sites_with_DE()}}
 
 \item{figure_title}{Character. The scatter plot title.}
 

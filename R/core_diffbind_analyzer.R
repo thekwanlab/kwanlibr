@@ -20,7 +20,6 @@
 #' @import latex2exp
 #' @import gtools
 #' @import tibble
-#' @import assertions
 
 #---------------------
 # Functions

@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_diffbind_analyzer.R
 \name{make_volcano_plot_from_merged}
 \alias{make_volcano_plot_from_merged}
-\title{Make Volcano Plot from DB and DE Data (Color by bulk logFC direction)}
+\title{Make Volcano Plot from DB and DE Data (Color by DE logFC direction)}
 \usage{
 make_volcano_plot_from_merged(
   merged_df,
@@ -21,7 +21,7 @@ make_volcano_plot_from_merged(
 )
 }
 \arguments{
-\item{merged_df}{Merged data generated from running \code{merge_sites_with_exp()}}
+\item{merged_df}{Merged data generated from running \code{merge_sites_with_DE()}}
 
 \item{figure_title}{Character. The title of the volcano plot.}
 

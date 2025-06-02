@@ -35,7 +35,8 @@ a binding site and includes:
 \item Site genomic coordinates
 \item Site ID
 \item Nearest gene name
-\item \code{bulk.logFC} and \code{bulk.FDR} values
+\item \code{DE.logFC} and \code{DE.FDR} values
+\item \code{DB.logFC} and \code{DB.FDR} values
 }
 }
 \description{
