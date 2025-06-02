@@ -54,12 +54,12 @@ ggplot object of scatter plot
 \description{
 make_scatter_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
 width, height, point_size, regression, DB_fdr_cutoff, DE_fdr_cutoff, point_color,
-line_color) create scatter plot from merged DB and DE data and save the plot under
-designated directory.
+line_color) create and saves scatter plot from merged DB and DE data and save the
+plot under designated directory.
 }
 \examples{
 make_scatter_plot_from_merged(
-  merged_df = merged_sigsites,
+  merged_df = merged_df,
   figure_title = "DB vs DE log2FC",
   figure_save_path = "diffbind_figures",
   file_name = "db_DE_scatter")

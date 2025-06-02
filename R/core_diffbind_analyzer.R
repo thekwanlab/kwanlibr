@@ -270,7 +270,7 @@ save_sites <- function(
 #' Create and save a density plot
 #'
 #' make_density_plot(dba_object, figure_title, file_name, fdr_threshold, figure_save_path,
-#' contrast_number, x_lim, width, height, color) creates a density plot from a DBA object
+#' contrast_number, xdiff, width, height, color) creates a density plot from a DBA object
 #' with specified figure title and saves it in pdf and png format under the designated
 #' file path.
 #'
@@ -282,7 +282,7 @@ save_sites <- function(
 #' Default is set to \code{NULL}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
 #' DBA object. Defeault is set to \code{1}.
-#' @param x_lim Numeric. The vector that contains limit for x axis, by default, it is \code{c(-1, 1)}.
+#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is NULL.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
 #' @param color Character. Color to fill the density plot. Default is \code{"aquamarine4"}.
@@ -303,7 +303,7 @@ make_density_plot <- function(
     fdr_threshold = 1,
     figure_save_path=NULL,
     contrast_number=1,
-    x_lim=c(-1, 1),
+    xdiff=NULL,
     width=8,
     height=6,
     color='aquamarine4'
@@ -330,8 +330,12 @@ make_density_plot <- function(
   p <- sites %>%
     ggplot(aes(x=Fold)) +
     geom_density(aes(y=after_stat(count)), fill=color) +
-    xlim(x_lim) +
     labs(x = TeX('$\\log_2$ FC'), title = figure_title)
+
+  # Add xlim conditionally
+  if (!is.null(xdiff)) {
+    p <- p + xlim(-xdiff, xdiff)
+  }
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
@@ -590,7 +594,7 @@ make_volcano_plot_diffbind <- function(
 
 #' Merge Differential Binding and Expression Data
 #'
-#' merge_sites_with_exp(dba_object, DE_file_path, tss_file_path, save_path, contrast_number)
+#' merge_sites_with_DE(dba_object, DE_file_path, tss_file_path, save_path, contrast_number)
 #' integrates differential binding sites with differential expression data (from bulk RNA-seq)
 #' by joining them based on their nearest gene TSS and returns a data frame where each row
 #' represents a differential binding site along with its nearest gene's differential expression.
@@ -611,17 +615,18 @@ make_volcano_plot_diffbind <- function(
 #'   \item Site genomic coordinates
 #'   \item Site ID
 #'   \item Nearest gene name
-#'   \item \code{bulk.logFC} and \code{bulk.FDR} values
+#'   \item \code{DE.logFC} and \code{DE.FDR} values
+#'   \item \code{DB.logFC} and \code{DB.FDR} values
 #' }
 #' @export
 #' @examples
-#' merge_sites_with_exp(
+#' merge_sites_with_DE(
 #'   dba_object = dba.obj,
 #'   DE_file_path = path_to_DE_csv_file,
 #'   tss_file_path = path_to_tss_file,
 #'   save_path = "diffbind_files")
 
-merge_sites_with_exp <- function(
+merge_sites_with_DE <- function(
     dba_object,
     DE_file_path,
     tss_file_path,
@@ -688,18 +693,20 @@ merge_sites_with_exp <- function(
   db_site_DE_data = db_site_gene_lookup %>%
     inner_join(DE, by = 'gene_name') %>%
     select(site.id, gene_name, logFC, FDR) %>%
-    dplyr::rename(bulk.logFC = logFC) %>%
-    dplyr::rename(bulk.FDR = FDR)
+    dplyr::rename(DE.logFC = logFC) %>%
+    dplyr::rename(DE.FDR = FDR)
 
   full_sites_and_DE_data = sites %>%
     tibble::rownames_to_column('site.id') %>%
     mutate(site.id = as.numeric(site.id)) %>%
+    dplyr::rename(DB.logFC = Fold) %>%
+    dplyr::rename(DB.FDR = FDR) %>%
     left_join(db_site_DE_data, by = 'site.id')
 
   return(full_sites_and_DE_data)
 }
 
-#' Make Volcano Plot from DB and DE Data (Color by bulk logFC direction)
+#' Make Volcano Plot from DB and DE Data (Color by DE logFC direction)
 #'
 #' make_volcano_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
 #' xdiff, ymax, point_size, point_alpha, width, height, DB_fdr_cutoff, DE_fdr_cutoff,
@@ -707,7 +714,7 @@ merge_sites_with_exp <- function(
 #' are shown in gray; DB sites mapped to significant DE genes are colored by direction
 #' of DE logFC (Up/Down).
 #'
-#' @param merged_df Merged data generated from running \code{merge_sites_with_exp()}
+#' @param merged_df Merged data generated from running \code{merge_sites_with_DE()}
 #' @param figure_title Character. The title of the volcano plot.
 #' @param figure_save_path Character. The path to save the volcano plot.
 #' @param file_name Character. Output figure file_name (e.g., "volcano.png").
@@ -749,7 +756,7 @@ make_volcano_plot_from_merged <- function(
     color=c("steelblue", "tomato")
 ){
   # Check for required columns
-  required_cols <- c("Fold", "FDR", "bulk.FDR", "bulk.logFC")
+  required_cols <- c("DB.logFC", "DB.FDR", "DE.logFC", "DE.FDR")
   missing_cols <- setdiff(required_cols, colnames(merged_df))
   if (length(missing_cols) > 0) {
     stop("The merged data is missing required column(s): ",
@@ -767,29 +774,29 @@ make_volcano_plot_from_merged <- function(
   }
 
   #filtering by FDR
-  sig_merged_df <- merged_df %>% filter(FDR < DB_fdr_cutoff)
+  sig_merged_df <- merged_df %>% filter(DB.FDR < DB_fdr_cutoff)
 
   downsampled_nonsig_merged_df <- merged_df %>%
-    filter(FDR > DB_fdr_cutoff) %>%
+    filter(DB.FDR > DB_fdr_cutoff) %>%
     sample_frac(1, replace = FALSE)
 
   volcano_merged_df <- sig_merged_df %>% bind_rows(downsampled_nonsig_merged_df)
-  volcano_merged_df <- merged_df %>% mutate(negLogFDR = -log10(FDR))
+  volcano_merged_df <- merged_df %>% mutate(negLogDBFDR = -log10(DB.FDR))
 
   # Add criteria column
   volcano_DE_groups <- volcano_merged_df %>%
-    filter(FDR < DB_fdr_cutoff) %>%
-    filter(bulk.FDR < DE_fdr_cutoff) %>%
-    mutate(bulk.logFC.direction = if_else(bulk.logFC > 0, 'Up', 'Down'))
+    filter(DB.FDR < DB_fdr_cutoff) %>%
+    filter(DE.FDR < DE_fdr_cutoff) %>%
+    mutate(DE.logFC.direction = if_else(DE.logFC > 0, 'Up', 'Down'))
 
   p <- ggplot() +
     geom_point(data = volcano_merged_df,
-               aes(x=Fold, y=negLogFDR),
+               aes(x=DB.logFC, y=negLogDBFDR),
                size = 1,
                alpha = 1,
                color = 'grey') +
     geom_point(data = volcano_DE_groups,
-               aes(x=Fold, y=negLogFDR, col=bulk.logFC.direction),
+               aes(x=DB.logFC, y=negLogDBFDR, col=DE.logFC.direction),
                size = point_size,
                alpha = point_alpha) +
     scale_colour_manual(values = color, na.value='grey') +
@@ -817,7 +824,7 @@ make_volcano_plot_from_merged <- function(
 #' line_color) create and saves scatter plot from merged DB and DE data and save the
 #' plot under designated directory.
 #'
-#' @param merged_df Merged data generated from running \code{merge_sites_with_exp()}
+#' @param merged_df Merged data generated from running \code{merge_sites_with_DE()}
 #' @param figure_title Character. The scatter plot title.
 #' @param figure_save_path Character. Directory to save the figure output.
 #' @param file_name Character. The base name of the scatter plot file.
@@ -858,7 +865,7 @@ make_scatter_plot_from_merged <- function(
     line_color='aquamarine4'
 ){
   # Check for required columns
-  required_cols <- c("Fold", "FDR", "bulk.FDR", "bulk.logFC")
+  required_cols <- c("DB.logFC", "DB.FDR", "DE.logFC", "DE.FDR")
   missing_cols <- setdiff(required_cols, colnames(merged_df))
   if (length(missing_cols) > 0) {
     stop("The merged data is missing required column(s): ",
@@ -874,21 +881,21 @@ make_scatter_plot_from_merged <- function(
   # exclude rows with NA Values in any column
   sig_merged_df <- merged_df %>%
     na.omit() %>%
-    filter(FDR < DB_fdr_cutoff) %>%
-    filter(bulk.FDR < DE_fdr_cutoff)
+    filter(DB.FDR < DB_fdr_cutoff) %>%
+    filter(DE.FDR < DE_fdr_cutoff)
 
   p <- sig_merged_df %>%
-    ggplot(aes(x = Fold, y = bulk.logFC)) +
+    ggplot(aes(x = DB.logFC, y = DE.logFC)) +
     geom_point(color = point_color,
                size = point_size)
 
   if (regression) {
-    db.DE.scatter.regression = glm(bulk.logFC ~ Fold, data = sig_merged_df)
-    beta = summary(db.DE.scatter.regression)$coefficients['Fold', 1]
-    p.val = summary(db.DE.scatter.regression)$coefficients['Fold', 4]
+    db.DE.scatter.regression = glm(DE.logFC ~ DB.logFC, data = sig_merged_df)
+    beta = summary(db.DE.scatter.regression)$coefficients['DB.logFC', 1]
+    p.val = summary(db.DE.scatter.regression)$coefficients['DB.logFC', 4]
     p <- p + geom_smooth(method = glm, color = line_color)+
-      xlim(c(-1,1) * max(abs(merged_df$Fold))) +
-      ylim(c(-1,1) * max(abs(merged_df$bulk.logFC))) +
+      xlim(c(-1,1) * max(abs(merged_df$DB.logFC))) +
+      ylim(c(-1,1) * max(abs(merged_df$DE.logFC))) +
       labs(x = TeX('Differential Binding Region $\\log_2$FC'),
            y = TeX('Nearby Gene RNAseq $\\log_2$FC'),
            title = figure_title)
@@ -897,8 +904,8 @@ make_scatter_plot_from_merged <- function(
 
   } else {
     p <- p +
-      xlim(c(-1,1) * max(abs(sig_merged_df$Fold))) +
-      ylim(c(-1,1) * max(abs(sig_merged_df$bulk.logFC))) +
+      xlim(c(-1,1) * max(abs(sig_merged_df$DB.logFC))) +
+      ylim(c(-1,1) * max(abs(sig_merged_df$DE.logFC))) +
       labs(x = TeX('Differential Binding Region $\\log_2$FC'),
            y = TeX('Nearby Gene RNAseq $\\log_2$FC'),
            title = figure_title)

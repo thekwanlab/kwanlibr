@@ -42,7 +42,14 @@ make_density_plot(dba.obj,
                   color='aquamarine4',
                   figure_title="Distribution of Differential Binding Regions",
                   figure_save_path = paste0(config$paths$test_results_dump, "diffbind_figures"),
-                  x_lim = c(-1, 1),
+                  file_name="df_fold_density_h3k27ac")
+
+make_density_plot(dba.obj,
+                  fdr_threshold = 1,
+                  color='aquamarine4',
+                  figure_title="Distribution of Differential Binding Regions",
+                  figure_save_path = paste0(config$paths$test_results_dump, "diffbind_figures"),
+                  xdiff = 1,
                   file_name="df_fold_density_h3k27ac")
 
 #===============
@@ -76,10 +83,10 @@ make_volcano_plot_diffbind(dba.obj,
 #================
 dba.obj <- readRDS("/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/dba_obj_mll_me1.RDS")
 options(scipen = 15)
-merged_data <- merge_sites_with_exp(dba.obj,
-                                    DE_file_path = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
-                                    tss_file_path = "informal_tests/test_results/diffbind_files_me1/TSS.bed",
-                                    save_path = paste0(config$paths$test_results_dump, "diffbind_files_me1"))
+merged_data <- merge_sites_with_DE(dba.obj,
+                                   DE_file_path = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
+                                   tss_file_path = "informal_tests/test_results/diffbind_files_me1/TSS.bed",
+                                   save_path = paste0(config$paths$test_results_dump, "diffbind_files_me1"))
 #=================
 # Test make_volcano_plot_from_merged
 #=================
@@ -90,8 +97,8 @@ make_volcano_plot_from_merged(merged_df = merged_data,
                                                '\n[ color by nearest TSS bulkRNAseq logFC, filtered by bulkRNAseq FDR < 0.05 ]'),
                               xdiff = 2,
                               ymax = 17.5,
-                              point_size=2,
-                              point_alpha=1,
+                              point_size = 2,
+                              point_alpha = 1,
                               width = 8,
                               height = 6)
 

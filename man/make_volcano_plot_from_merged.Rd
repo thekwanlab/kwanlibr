@@ -57,8 +57,9 @@ A ggplot object of DB and DE merged volcano plot
 \description{
 make_volcano_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
 xdiff, ymax, point_size, point_alpha, width, height, DB_fdr_cutoff, DE_fdr_cutoff,
-color) creates a volcano plot based on merged DB and DE data. All sites are shown in
-gray; DB sites mapped to significant DE genes are colored by direction of DE logFC (Up/Down).
+color) creates and saves a volcano plot based on merged DB and DE data. All sites
+are shown in gray; DB sites mapped to significant DE genes are colored by direction
+of DE logFC (Up/Down).
 }
 \examples{
 make_volcano_plot_from_merged(

@@ -11,7 +11,7 @@ make_density_plot(
   fdr_threshold = 1,
   figure_save_path = NULL,
   contrast_number = 1,
-  x_lim = c(-1, 1),
+  xdiff = NULL,
   width = 8,
   height = 6,
   color = "aquamarine4"
@@ -32,7 +32,7 @@ Default is set to \code{NULL}.}
 \item{contrast_number}{Integer. Index indicating which contrast to extract from the
 DBA object. Defeault is set to \code{1}.}
 
-\item{x_lim}{Numeric. The vector that contains limit for x axis, by default, it is \code{c(-1, 1)}.}
+\item{xdiff}{Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is NULL.}
 
 \item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
 
@@ -45,7 +45,7 @@ A ggplot object of density plot.
 }
 \description{
 make_density_plot(dba_object, figure_title, file_name, fdr_threshold, figure_save_path,
-contrast_number, width, height, color) creates a density plot from a DBA object
+contrast_number, xdiff, width, height, color) creates a density plot from a DBA object
 with specified figure title and saves it in pdf and png format under the designated
 file path.
 }
