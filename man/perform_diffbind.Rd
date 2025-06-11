@@ -19,32 +19,31 @@ perform_diffbind(
 Normally the file is named 'diffbind_samples.csv' and placed in the current
 working directory. It must contain the following columns:
 \itemize{
-\item \strong{"Sample_ID"}
-\item \strong{"Tissue"}
+\item \strong{"SampleID"}
 \item \strong{"Condition"}
 \item \strong{"bamReads"}
 \item \strong{"Peaks"}
 \item \strong{"PeakCaller"}
 }}
 
-\item{control_level}{Character. Reference group name (e.g., "HET", "Ctrl").}
+\item{control_level}{Name of reference group (e.g., "HET", "Ctrl").}
 
-\item{min_members}{Integer. Minimum number of replicates per condition (default is \code{NULL}).
+\item{min_members}{Minimum number of replicates per condition.
 Set to 2 if any condition has only 2 replicates, otherwise set to \code{NULL}.}
 
-\item{analysis_method}{The analysis method, either \code{DBA_DESEQ2} (default) or \code{DBA_EDGER}.}
+\item{analysis_method}{The analysis method, either \code{DBA_DESEQ2} or \code{DBA_EDGER}.}
 
-\item{data_type}{Output format of peak data (default is \code{DBA_DATA_FRAME}).
-Other options are \code{DBA_DATA_GRANGES}, \code{DBA_DATA_RANGEDDATA}.}
+\item{data_type}{Output format of peak data.
+One of \code{DBA_DATA_FRAME}, \code{DBA_DATA_GRANGES}, \code{DBA_DATA_RANGEDDATA}.}
 
-\item{fdr_threshold}{Numeric. FDR cutoff for significance, used in both filtering
-and visualization (Default is 0.05).}
+\item{fdr_threshold}{FDR cutoff for significance, used in both filtering
+and visualization.}
 
-\item{normalization}{Normalization method (default is \code{DBA_NORM_LIB}). Other options
-include \code{DBA_NORM_RLE}, \code{DBA_NORM_TMM}, etc.}
+\item{normalization}{Normalization method. One of \code{DBA_NORM_LIB}, \code{DBA_NORM_RLE},
+\code{DBA_NORM_TMM}, etc. See DiffBind documentation}
 }
 \value{
-analyzed DBA object
+analyzed diffbind object
 }
 \description{
 perform_diffbind(sample_sheet_path, control_level, min_members, analysis_method,
