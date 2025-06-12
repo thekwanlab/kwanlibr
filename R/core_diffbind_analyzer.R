@@ -71,7 +71,7 @@ perform_diffbind <- function(
     normalization = DBA_NORM_LIB
 ){
   if (is.null(sample_sheet_path) || !file.exists(sample_sheet_path)) {
-    stop("The 'sampleSheetPath' is invalid or the file does not exist.")
+    stop("'sample_sheet_path' is invalid or the file does not exist.")
   }
 
   samplesheet <- read.csv(sample_sheet_path, stringsAsFactors = FALSE)
