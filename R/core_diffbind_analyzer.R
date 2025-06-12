@@ -691,17 +691,13 @@ merge_diffbind_with_DE <- function(
   # run bash commands to retrieve the nearest gene ID
   allDB_bed <- file.path(save_directory, "allDB_sites.bed")
   lookup_tsv <- file.path(save_directory, "DB_site_nearest_gene_lookup.tsv")
-  sorted_bed <- tempfile(pattern = "sorted_allDB_sites_", fileext = ".bed")
+  sorted_bed <- tempfile(pattern = "sorted_allDB_sites_", tmpdir = save_directory, fileext = ".bed")
 
-  cmd <- sprintf(
-    'module load Bioinformatics bedops/2.4.41 && sort-bed %s > %s && closest-features --closest --delim "\t" %s %s | awk \'{ print $4, $9 }\' > %s',
-    shQuote(allDB_bed),
-    shQuote(sorted_bed),
-    shQuote(sorted_bed),
-    shQuote(tss_file_path),
-    shQuote(lookup_tsv)
-  )
-  system2("bash", args = c("-l", "-c", cmd))
+  system(paste("module load Bioinformatics bedops/2.4.41 &&",
+               "sort-bed", allDB_bed, ">", sorted_bed,
+               "&& closest-features --closest --delim '\t'", sorted_bed,
+               tss_file_path,
+               "| awk '{ print $4 \"\\t\" $9 }' >", lookup_tsv), intern = TRUE)
 
   # read the annotated gene expression RNA sequencing file
   db_site_gene_lookup = read.table(lookup_tsv,
