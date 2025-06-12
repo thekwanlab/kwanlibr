@@ -215,6 +215,7 @@ save_diffbind_sites <- function(
     fdr_threshold = 0.05,
     contrast_number = 1
 ){
+  options(scipen = 99) 
   if (is.null(save_directory)) {
     save_directory <- getwd()
   }
@@ -684,6 +685,7 @@ merge_diffbind_with_DE <- function(
     tibble::rownames_to_column('site.id') %>%
     select(Chr, Start, End, site.id, Score)
 
+  options(scipen = 99) # (practically) disable scientific notation in output
   write.table(allDB.sites, file = file.path(save_directory, 'allDB_sites.bed'),
               quote = FALSE, sep = '\t',
               row.names = FALSE, col.names = FALSE)
