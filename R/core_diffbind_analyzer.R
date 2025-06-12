@@ -51,7 +51,7 @@
 #' @param analysis_method The analysis method, either \code{DBA_DESEQ2} or \code{DBA_EDGER}.
 #' @param fdr_threshold FDR cutoff for significance, used in both filtering
 #' and visualization.
-#' @param normalization Normalization method. One of \code{DBA_NORM_LIB}, \code{DBA_NORM_RLE}, 
+#' @param normalization Normalization method. One of \code{DBA_NORM_LIB}, \code{DBA_NORM_RLE},
 #' \code{DBA_NORM_TMM}, etc. See DiffBind documentation
 #' @return analyzed diffbind object
 #' @keywords diffbind
@@ -117,7 +117,7 @@ perform_diffbind <- function(
 }
 
 #' Save DBA object
-#' 
+#'
 #' save_diffbind_object(dba_object, file_suffix, save_directory) saves the
 #' DBA object under the specified file path. It returns nothing
 #'
@@ -160,7 +160,7 @@ save_diffbind_object <- function(
 #' Default is \code{0.05}.
 #' @param contrast_number Integer. Index specifying which contrast to extract
 #' results from. Defaults to \code{1} corresponding to the first contrast.
-#' @param verbose Boolean. If true, it prints information on number of DB sites. 
+#' @param verbose Boolean. If true, it prints information on number of DB sites.
 #' Silent if false.
 #' @return A dataframe that contains filtered sites information.
 #' @export
@@ -187,19 +187,19 @@ get_diffbind_sites <- function(
     print(paste('Positive logFC:', sum(sites$Fold > 0)))
     print(paste('Negative logFC:', sum(sites$Fold < 0)))
   }
-  
+
   return(sites)
 }
 
 #' save differential binding sites files
-#' 
+#'
 #' save_diffbind_sites(dba_object, save_directory, fdr_threshold, contrast_number) saves site
 #' dataframes in bed format based on different fdr_threshold, which includes allDB
 #' sites, upDB sites, and downDB sites. It doesn't return anything
 #'
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
 #' @param save_directory Character. Output directory where results are written.
-#' @param fdr_threshold Numeric. FDR cutoff for significantly differntially 
+#' @param fdr_threshold Numeric. FDR cutoff for significantly differntially
 #' bound up and down sites
 #' @param contrast_number Integer. Index specifying which contrast to extract
 #' results from. Defaults to \code{1} corresponding to the first contrast.
@@ -261,7 +261,7 @@ save_diffbind_sites <- function(
                           verbose = FALSE)
 
   # all.sites order by chromosomes and base pair
-  # sorting both Chr and Start is challenging due to 
+  # sorting both Chr and Start is challenging due to
   # a) default sorting of Chr yields chr1 -> chr10 .... -> chr2
   # b) dplyr::arrange discards the current group order
   Consensus.sites <- all.sites %>%
@@ -538,7 +538,7 @@ get_diffbind_volcano_data <- function(
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
 #' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.
-#' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}. 
+#' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from
 #' the DBA object. Defeault is set to \code{1}.
 #' @param fdr_threshold Numeric. The FDR threshold used for grouping, default is \code{0.05}.
@@ -910,23 +910,17 @@ make_scatter_plot_from_merged <- function(
     db.DE.scatter.regression = glm(DE.logFC ~ DB.logFC, data = sig_merged_df)
     beta = summary(db.DE.scatter.regression)$coefficients['DB.logFC', 1]
     p.val = summary(db.DE.scatter.regression)$coefficients['DB.logFC', 4]
-    p <- p + geom_smooth(method = glm, color = line_color)+
-      xlim(c(-1,1) * max(abs(merged_df$DB.logFC))) +
-      ylim(c(-1,1) * max(abs(merged_df$DE.logFC))) +
-      labs(x = TeX('Differential Binding Region $\\log_2$FC'),
-           y = TeX('Nearby Gene RNAseq $\\log_2$FC'),
-           title = figure_title)
+    p <- p + geom_smooth(method = glm, color = line_color)
 
     cat(paste0("beta = ", beta, "\np value = ", p.val, "\n"))
-
-  } else {
-    p <- p +
-      xlim(c(-1,1) * max(abs(sig_merged_df$DB.logFC))) +
-      ylim(c(-1,1) * max(abs(sig_merged_df$DE.logFC))) +
-      labs(x = TeX('Differential Binding Region $\\log_2$FC'),
-           y = TeX('Nearby Gene RNAseq $\\log_2$FC'),
-           title = figure_title)
   }
+
+  p <- p +
+    xlim(c(-1,1) * max(abs(sig_merged_df$DB.logFC))) +
+    ylim(c(-1,1) * max(abs(sig_merged_df$DE.logFC))) +
+    labs(x = TeX('Differential Binding Region $\\log_2$FC'),
+         y = TeX('Nearby Gene RNAseq $\\log_2$FC'),
+         title = figure_title)
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
