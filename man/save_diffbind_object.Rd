@@ -2,31 +2,26 @@
 % Please edit documentation in R/core_diffbind_analyzer.R
 \name{save_diffbind_object}
 \alias{save_diffbind_object}
-\title{Save DBA object
-It returns nothing
-save_diffbind_object(dba_object, file_suffix, dbaobj_save_path) saves the
-DBA object under the specified file path.}
+\title{Save DBA object}
 \usage{
-save_diffbind_object(dba_object, file_suffix, dbaobj_save_path = NULL)
+save_diffbind_object(dba_object, file_suffix, save_directory = NULL)
 }
 \arguments{
 \item{dba_object}{DBA object obtained after \code{perform_diffbind()}.}
 
 \item{file_suffix}{Character. Suffix for the output DBA object file.}
 
-\item{dbaobj_save_path}{Character. Directory path to save the resulting
+\item{save_directory}{Character. Directory path to save the resulting
 DBA object (default is \code{NULL}). If \code{NULL}, current working
 directory is used.}
 }
 \description{
-Save DBA object
-It returns nothing
-save_diffbind_object(dba_object, file_suffix, dbaobj_save_path) saves the
-DBA object under the specified file path.
+save_diffbind_object(dba_object, file_suffix, save_directory) saves the
+DBA object under the specified file path. It returns nothing
 }
 \examples{
 save_diffbind_object(
   dba_object = dba.obj,
   file_suffix = "h3k27me3",
-  dbaobj_save_path = "test_results")
+  save_directory = "test_results")
 }

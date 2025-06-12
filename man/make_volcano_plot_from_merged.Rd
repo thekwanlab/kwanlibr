@@ -7,10 +7,10 @@
 make_volcano_plot_from_merged(
   merged_df,
   figure_title,
-  figure_save_path,
-  file_name,
-  xdiff = 5,
-  ymax = 40,
+  save_directory,
+  save_name,
+  xdiff = 3,
+  ymax = 20,
   point_size = 1,
   point_alpha = 1,
   width = 8,
@@ -21,17 +21,17 @@ make_volcano_plot_from_merged(
 )
 }
 \arguments{
-\item{merged_df}{Merged data generated from running \code{merge_sites_with_DE()}}
+\item{merged_df}{Merged data generated from running \code{merge_diffbind_with_DE()}}
 
 \item{figure_title}{Character. The title of the volcano plot.}
 
-\item{figure_save_path}{Character. The path to save the volcano plot.}
+\item{save_directory}{Character. The path to save the volcano plot.}
 
-\item{file_name}{Character. Output figure file_name (e.g., "volcano.png").}
+\item{save_name}{Character. Output figure save_name (e.g., "volcano.png").}
 
-\item{xdiff}{Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is \code{5}.}
+\item{xdiff}{Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.}
 
-\item{ymax}{Numeric. Limits the y-axis range to \code{[0, ymax]}. Default is \code{40}.}
+\item{ymax}{Numeric. Limits the y-axis range to \code{[0, ymax]}.}
 
 \item{point_size}{Numeric. Point size in the plot. Default is \code{1}.}
 
@@ -55,7 +55,7 @@ color. default is set to \code{c('steelblue', 'tomato')}.}
 A ggplot object of DB and DE merged volcano plot
 }
 \description{
-make_volcano_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
+make_volcano_plot_from_merged(merged_df, figure_title, save_directory, save_name,
 xdiff, ymax, point_size, point_alpha, width, height, DB_fdr_cutoff, DE_fdr_cutoff,
 color) creates and saves a volcano plot based on merged DB and DE data. All sites
 are shown in gray; DB sites mapped to significant DE genes are colored by direction
@@ -65,6 +65,6 @@ of DE logFC (Up/Down).
 make_volcano_plot_from_merged(
   merged_df = merged_volcano,
   figure_title = 'cKO vs cHet Differential Binding sites',
-  figure_save_path = "diffbind_figures",
-  file_name = "db_volcano_DE_color_binary")
+  save_directory = "diffbind_figures",
+  save_name = "db_volcano_DE_color_binary")
 }

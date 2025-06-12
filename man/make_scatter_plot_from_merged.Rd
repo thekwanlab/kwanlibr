@@ -7,8 +7,8 @@
 make_scatter_plot_from_merged(
   merged_df,
   figure_title,
-  figure_save_path,
-  file_name,
+  save_directory,
+  save_name,
   width = 8,
   height = 6,
   point_size = 1,
@@ -20,13 +20,13 @@ make_scatter_plot_from_merged(
 )
 }
 \arguments{
-\item{merged_df}{Merged data generated from running \code{merge_sites_with_DE()}}
+\item{merged_df}{Merged data generated from running \code{merge_diffbind_with_DE()}}
 
 \item{figure_title}{Character. The scatter plot title.}
 
-\item{figure_save_path}{Character. Directory to save the figure output.}
+\item{save_directory}{Character. Directory to save the figure output.}
 
-\item{file_name}{Character. The base name of the scatter plot file.}
+\item{save_name}{Character. The base name of the scatter plot file.}
 
 \item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
 
@@ -52,7 +52,7 @@ expression. Defualt is 0.05.}
 ggplot object of scatter plot
 }
 \description{
-make_scatter_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
+make_scatter_plot_from_merged(merged_df, figure_title, save_directory, save_name,
 width, height, point_size, regression, DB_fdr_cutoff, DE_fdr_cutoff, point_color,
 line_color) create and saves scatter plot from merged DB and DE data and save the
 plot under designated directory.
@@ -61,6 +61,6 @@ plot under designated directory.
 make_scatter_plot_from_merged(
   merged_df = merged_df,
   figure_title = "DB vs DE log2FC",
-  figure_save_path = "diffbind_figures",
-  file_name = "db_DE_scatter")
+  save_directory = "diffbind_figures",
+  save_name = "db_DE_scatter")
 }

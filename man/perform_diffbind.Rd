@@ -9,7 +9,6 @@ perform_diffbind(
   control_level,
   min_members = NULL,
   analysis_method = DBA_DESEQ2,
-  data_type = DBA_DATA_FRAME,
   fdr_threshold = 0.05,
   normalization = DBA_NORM_LIB
 )
@@ -32,9 +31,6 @@ working directory. It must contain the following columns:
 Set to 2 if any condition has only 2 replicates, otherwise set to \code{NULL}.}
 
 \item{analysis_method}{The analysis method, either \code{DBA_DESEQ2} or \code{DBA_EDGER}.}
-
-\item{data_type}{Output format of peak data.
-One of \code{DBA_DATA_FRAME}, \code{DBA_DATA_GRANGES}, \code{DBA_DATA_RANGEDDATA}.}
 
 \item{fdr_threshold}{FDR cutoff for significance, used in both filtering
 and visualization.}

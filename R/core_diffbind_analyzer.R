@@ -49,8 +49,6 @@
 #' @param min_members Minimum number of replicates per condition.
 #' Set to 2 if any condition has only 2 replicates, otherwise set to \code{NULL}.
 #' @param analysis_method The analysis method, either \code{DBA_DESEQ2} or \code{DBA_EDGER}.
-#' @param data_type Output format of peak data.
-#' One of \code{DBA_DATA_FRAME}, \code{DBA_DATA_GRANGES}, \code{DBA_DATA_RANGEDDATA}.
 #' @param fdr_threshold FDR cutoff for significance, used in both filtering
 #' and visualization.
 #' @param normalization Normalization method. One of \code{DBA_NORM_LIB}, \code{DBA_NORM_RLE}, 
@@ -69,7 +67,6 @@ perform_diffbind <- function(
     control_level,
     min_members = NULL,
     analysis_method = DBA_DESEQ2,
-    data_type = DBA_DATA_FRAME,
     fdr_threshold = 0.05,
     normalization = DBA_NORM_LIB
 ){
@@ -96,7 +93,7 @@ perform_diffbind <- function(
   #Generate dba object
   dba.obj.samples <- DiffBind::dba(sampleSheet = sample_sheet_path)
   dba.obj.samples$config$th <- fdr_threshold
-  dba.obj.samples$config$DataType <- data_type
+  dba.obj.samples$config$DataType <- DBA_DATA_FRAME
   dba.obj.samples$config$AnalysisMethod <- analysis_method
 
   dba.obj.blacklist <- DiffBind::dba.blacklist(dba.obj.samples)
@@ -120,13 +117,13 @@ perform_diffbind <- function(
 }
 
 #' Save DBA object
-#' It returns nothing
-#' save_diffbind_object(dba_object, file_suffix, dbaobj_save_path) saves the
-#' DBA object under the specified file path.
+#' 
+#' save_diffbind_object(dba_object, file_suffix, save_directory) saves the
+#' DBA object under the specified file path. It returns nothing
 #'
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
 #' @param file_suffix Character. Suffix for the output DBA object file.
-#' @param dbaobj_save_path Character. Directory path to save the resulting
+#' @param save_directory Character. Directory path to save the resulting
 #' DBA object (default is \code{NULL}). If \code{NULL}, current working
 #' directory is used.
 #' @export
@@ -134,24 +131,27 @@ perform_diffbind <- function(
 #' save_diffbind_object(
 #'   dba_object = dba.obj,
 #'   file_suffix = "h3k27me3",
-#'   dbaobj_save_path = "test_results")
+#'   save_directory = "test_results")
 
 save_diffbind_object <- function(
     dba_object,
     file_suffix,
-    dbaobj_save_path = NULL
+    save_directory = NULL
 ){
-  if (is.null(dbaobj_save_path)) {
-    dbaobj_save_path <- getwd()
+  if (is.null(save_directory)) {
+    save_directory <- getwd()
   }
 
+  file_path = file.path(save_directory, paste0("dba_obj_", file_suffix, ".RDS"))
+  message(paste('Saving diffbind object to', file_path))
+
   #Save the DBA object
-  saveRDS(dba_object, file=file.path(dbaobj_save_path, paste0("dba_obj_", file_suffix, ".RDS")))
+  saveRDS(dba_object, file=file_path)
 }
 
 #' Retrieve Differentially Bind Sites from a DBA object
 #'
-#' get_DBsites(dba_object, fdr_threshold, contrast_number) Extracts differentially
+#' get_diffbind_sites(dba_object, fdr_threshold, contrast_number) Extracts differentially
 #' bound (DB) regions from a DBA object and filters regions based on a user-defined
 #' FDR threshold, finally returns a dataframe that contains sites information.
 #'
@@ -160,15 +160,18 @@ save_diffbind_object <- function(
 #' Default is \code{0.05}.
 #' @param contrast_number Integer. Index specifying which contrast to extract
 #' results from. Defaults to \code{1} corresponding to the first contrast.
+#' @param verbose Boolean. If true, it prints information on number of DB sites. 
+#' Silent if false.
 #' @return A dataframe that contains filtered sites information.
 #' @export
 #' @examples
-#' get_DBsites(dba_object = dba.obj)
+#' get_diffbind_sites(dba_object = dba.obj)
 
-get_DBsites <- function(
+get_diffbind_sites <- function(
     dba_object,
     fdr_threshold = 0.05,
-    contrast_number = 1
+    contrast_number = 1,
+    verbose = TRUE
 ){
   if (contrast_number <= 0 || contrast_number > length(dba_object$contrasts)) {
     stop("Invalid contrast_number. Please provide a valid contrast index.")
@@ -180,46 +183,49 @@ get_DBsites <- function(
     stop("No sites found in the report. Please check your contrast setup.")
   }
 
-  print(paste('Positive logFC:', sum(sites$Fold > 0)))
-  print(paste('Negative logFC:', sum(sites$Fold < 0)))
-
+  if (verbose) {
+    print(paste('Positive logFC:', sum(sites$Fold > 0)))
+    print(paste('Negative logFC:', sum(sites$Fold < 0)))
+  }
+  
   return(sites)
 }
 
-#' save different sites files
-#' It doesn't return anything
-#' save_sites(dba_object, save_path, fdr_threshold, contrast_number) saves site
+#' save differential binding sites files
+#' 
+#' save_diffbind_sites(dba_object, save_directory, fdr_threshold, contrast_number) saves site
 #' dataframes in bed format based on different fdr_threshold, which includes allDB
-#' sites, upDB sites, and downDB sites.
+#' sites, upDB sites, and downDB sites. It doesn't return anything
 #'
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
-#' @param save_path Character. Output directory where results are written.
-#' @param fdr_threshold Numeric. If it is 1, then it saves all DB sites, if
-#' it is 0.05, then it save upDB and downDB sites separately.
+#' @param save_directory Character. Output directory where results are written.
+#' @param fdr_threshold Numeric. FDR cutoff for significantly differntially 
+#' bound up and down sites
 #' @param contrast_number Integer. Index specifying which contrast to extract
 #' results from. Defaults to \code{1} corresponding to the first contrast.
 #' @export
 #' @examples
-#' save_sites(
+#' save_diffbind_sites(
 #'   dba_object = dba.obj,
-#'   save_path = "diffbind_files")
+#'   save_directory = "diffbind_files")
 
-save_sites <- function(
+save_diffbind_sites <- function(
     dba_object,
-    save_path,
+    save_directory = NULL,
     fdr_threshold = 0.05,
     contrast_number = 1
 ){
-  if (is.null(save_path)) {
-    save_path <- getwd()
+  if (is.null(save_directory)) {
+    save_directory <- getwd()
   }
-  if (!dir.exists(save_path)) {
-    dir.create(save_path, recursive = TRUE)
+  if (!dir.exists(save_directory)) {
+    dir.create(save_directory, recursive = TRUE)
   }
 
-  sig.sites <- get_DBsites(dba_object,
+  sig.sites <- get_diffbind_sites(dba_object,
                            fdr_threshold = fdr_threshold,
-                           contrast_number = contrast_number)
+                           contrast_number = contrast_number,
+                           verbose = FALSE)
 
   #UpDB.sites sorted by FDR
   upDB.sites <- sig.sites %>%
@@ -230,7 +236,8 @@ save_sites <- function(
     select(Chr, Start, End, site.id, Score) %>%
     mutate(Position = paste0(Chr, ':', Start, "-", End))
 
-  write.table(upDB.sites, file = file.path(save_path, 'upDB_sites.bed'),
+  upDB_sites_file_name = file.path(save_directory, 'upDB_sites.bed')
+  write.table(upDB.sites, file = upDB_sites_file_name,
               quote = FALSE, sep = '\t',
               row.names = FALSE, col.names = FALSE)
 
@@ -243,44 +250,58 @@ save_sites <- function(
     select(Chr, Start, End, site.id, Score) %>%
     mutate(Position = paste0(Chr, ':', Start, "-", End))
 
-  write.table(DownDB.sites, file = file.path(save_path, 'downDB_sites.bed'),
+  downDB_sites_file_name = file.path(save_directory, 'downDB_sites.bed')
+  write.table(DownDB.sites, file = downDB_sites_file_name,
               quote = FALSE, sep = '\t',
               row.names = FALSE, col.names = FALSE)
 
-  all.sites <- get_DBsites(dba_object,
+  all.sites <- get_diffbind_sites(dba_object,
                           fdr_threshold = 1,
-                          contrast_number = contrast_number)
+                          contrast_number = contrast_number,
+                          verbose = FALSE)
 
-  #all.sites order by chromosomes
+  # all.sites order by chromosomes and base pair
+  # sorting both Chr and Start is challenging due to 
+  # a) default sorting of Chr yields chr1 -> chr10 .... -> chr2
+  # b) dplyr::arrange discards the current group order
   Consensus.sites <- all.sites %>%
     mutate(Score = -log10(FDR)) %>%
     tibble::rownames_to_column('site.id') %>%
     select(Chr, Start, End, site.id, FDR, Score) %>%
     mutate(Position = paste0(Chr, ':', Start, "-", End)) %>%
-    slice(gtools::mixedorder(Chr), Start) %>%
-    arrange(Chr, Start)
+    slice(gtools::mixedorder(Chr)) %>%
+    group_by(Chr) %>%
+    mutate(across(everything(), ~.[order(Start)]))
 
-  write.table(Consensus.sites, file = file.path(save_path,'consensus_sites.bed'),
+  consensus_sites_file_name = file.path(save_directory,'consensus_sites.bed')
+  write.table(Consensus.sites, file = consensus_sites_file_name,
               quote = FALSE, sep = '\t',
               row.names = FALSE, col.names = FALSE)
+
+  message(paste(
+    'Files saved:',
+    upDB_sites_file_name,
+    downDB_sites_file_name,
+    consensus_sites_file_name,
+    sep='\n'))
 }
 
 #' Create and save a density plot
 #'
-#' make_density_plot(dba_object, figure_title, file_name, fdr_threshold, figure_save_path,
+#' make_diffbind_density_plot(dba_object, figure_title, save_name, fdr_threshold, save_directory,
 #' contrast_number, xdiff, width, height, color) creates a density plot from a DBA object
 #' with specified figure title and saves it in pdf and png format under the designated
 #' file path.
 #'
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
 #' @param figure_title Character. Title for density plot.
-#' @param file_name Character. Base name used for saving the plot files.
+#' @param save_name Character. Base name used for saving the plot files.
 #' @param fdr_threshold Numeric. FDR cutoff for DB significance (Default is 1).
-#' @param figure_save_path Character. Directory path where the plot files will be saved.
+#' @param save_directory Character. Directory path where the plot files will be saved.
 #' Default is set to \code{NULL}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
 #' DBA object. Defeault is set to \code{1}.
-#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is NULL.
+#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Setting to NULL frees the limits
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
 #' @param color Character. Color to fill the density plot. Default is \code{"aquamarine4"}.
@@ -288,41 +309,42 @@ save_sites <- function(
 #' @keywords Density Plot
 #' @export
 #' @examples
-#' make_density_plot(
+#' make_diffbind_density_plot(
 #'   dba_object = dba.obj,
 #'   figure_title = "Distribution of Differential Binding Regions",
-#'   file_name = "df_fold_density_h3k27ac",
-#'   figure_save_path = "diffbind_figures")
+#'   save_name = "df_fold_density_h3k27ac",
+#'   save_directory = "diffbind_figures")
 
-make_density_plot <- function(
+make_diffbind_density_plot <- function(
     dba_object,
     figure_title,
-    file_name,
+    save_name,
     fdr_threshold = 1,
-    figure_save_path=NULL,
+    save_directory = NULL,
     contrast_number=1,
-    xdiff=NULL,
+    xdiff=3,
     width=8,
     height=6,
     color='aquamarine4'
 ){
-  if (is.null(file_name)) {
+  if (is.null(save_name)) {
     stop("A valid file name is required to be specified.")
   }
 
   #strip off extensions in the filename
-  if (tools::file_ext(file_name) != "") {
-    file_name <- tools::file_path_sans_ext(file_name)
-    warning("file name should not include any extensions, file name changed to: ", file_name)
+  if (tools::file_ext(save_name) != "") {
+    save_name <- tools::file_path_sans_ext(save_name)
+    warning("file name should not include any extensions, file name changed to: ", save_name)
   }
 
-  if (is.null(figure_save_path)) {
-    figure_save_path <- getwd()
+  if (is.null(save_directory)) {
+    save_directory <- getwd()
   }
 
-  sites <- get_DBsites(dba_object = dba_object,
+  sites <- get_diffbind_sites(dba_object = dba_object,
                       fdr_threshold = fdr_threshold,
-                      contrast_number = contrast_number)
+                      contrast_number = contrast_number,
+                      verbose = FALSE)
 
   #draw density plot
   p <- sites %>%
@@ -337,21 +359,21 @@ make_density_plot <- function(
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
-    filename = file.path(figure_save_path, file_name),
+    filename = file.path(save_directory, save_name),
     width = width, height = height, dpi=600,
     plot = p
   )
 
   message("Density Plot is generated successfully. Results saved to: \n",
-          file.path(figure_save_path, paste0(file_name ,'.png')), " and \n",
-          file.path(figure_save_path, paste0(file_name ,'.pdf')))
+          file.path(save_directory, paste0(save_name ,'.png')), " and \n",
+          file.path(save_directory, paste0(save_name ,'.pdf')))
   return(p)
 }
 
 #' Create and save a PCA plot
 #'
-#' make_PCA_plot_diffbind(dba_object, figure_title_nocontrast, figure_title_contrast,
-#' figure_save_path, file_name, point_size, width, height, color) Creates side-by-side PCA
+#' make_diffbind_PCA_plot(dba_object, figure_title_nocontrast, figure_title_contrast,
+#' save_directory, save_name, point_size, width, height, color) Creates side-by-side PCA
 #' plots to compare the variance structure of all consensus binding regions vs differentially
 #' bound (DB) regions from a DBA object. Both plots are saved as PNG and PDF files under
 #' designated file path.
@@ -361,8 +383,8 @@ make_density_plot <- function(
 #' regions.
 #' @param figure_title_contrast Character. Title for the PCA plot using only differentially
 #' bound regions.
-#' @param figure_save_path Character. Directory path where output plots will be saved.
-#' @param file_name Character. Base name (without extension) for the saved plot files.
+#' @param save_directory Character. Directory path where output plots will be saved.
+#' @param save_name Character. Base name (without extension) for the saved plot files.
 #' @param point_size Numeric. Size of the points, default is set to 8.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 20.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 9.
@@ -373,32 +395,32 @@ make_density_plot <- function(
 #' @import gridExtra
 #' @export
 #' @examples
-#' make_PCA_plot_diffbind(
+#' make_diffbind_PCA_plot(
 #'   dba_object = dba.obj,
 #'   figure_title_nocontrast = "PCA of All Consensus Regions",
 #'   figure_title_contrast = "PCA of Differential Binding Regions",
-#'   figure_save_path = "diffbind_figures",
-#'   file_name = "diffbind_pca_plots")
+#'   save_directory = "diffbind_figures",
+#'   save_name = "diffbind_pca_plots")
 
-make_PCA_plot_diffbind <- function(
+make_diffbind_PCA_plot <- function(
     dba_object,
     figure_title_nocontrast,
     figure_title_contrast,
-    figure_save_path,
-    file_name,
+    save_name,
+    save_directory = NULL,
     point_size=8,
     width=20,
     height=9,
     color=c('darkmagenta','aquamarine4')
 ){
   #strip off extensions in the filename
-  if (tools::file_ext(file_name) != "") {
-    file_name <- tools::file_path_sans_ext(file_name)
-    warning("file name should not include any extensions, file name changed to: ", file_name)
+  if (tools::file_ext(save_name) != "") {
+    save_name <- tools::file_path_sans_ext(save_name)
+    warning("file name should not include any extensions, file base name changed to: ", save_name)
   }
 
-  if (is.null(figure_save_path)) {
-    figure_save_path = getwd()
+  if (is.null(save_directory)) {
+    save_directory = getwd()
   }
 
   if (length(color) != 2) {
@@ -438,50 +460,50 @@ make_PCA_plot_diffbind <- function(
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
-    filename = file.path(figure_save_path, file_name),
+    filename = file.path(save_directory, save_name),
     width = width, height = height, dpi = 600,
     plot = p
   )
 
   message("PCA Plot is generated successfully. Results saved to: \n",
-          file.path(figure_save_path, paste0(file_name ,'.png')), " and \n",
-          file.path(figure_save_path, paste0(file_name ,'.pdf')))
+          file.path(save_directory, paste0(save_name ,'.png')), " and \n",
+          file.path(save_directory, paste0(save_name ,'.pdf')))
 
   return(p)
 }
 
 #' Generate volcano-plot-ready data from DiffBind results
 #'
-#' make_volcano_sites(dba_object, contrast_number, fdr_threshold, xdiff, ymax) makes
+#' get_diffbind_volcano_data(dba_object, contrast_number, fdr_threshold, xdiff, ymax) makes
 #' volcano-plottable table and applies filtering based on FDR threshold and clamps
 #' values.
 #'
 #' @param dba_object DBA object (RDS format) generated by \code{perform_diffbind()}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
 #' DBA object. Defeault is set to \code{1}.
-#' @param fdr_threshold Numeric. FDR cutoff for significance. Default is set to \code{0.05}.
-#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is \code{5}.
-#' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}. Default is \code{40}.
+#' @param fdr_threshold Numeric. FDR cutoff for significance.
+#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.
+#' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}.
 #' @return A dataframe that contains volcano-plottable data.
 #' @export
 #' @examples
-#' make_volcano_sites(dba_object = dba.obj)
+#' get_diffbind_volcano_data(dba_object = dba.obj)
 
-make_volcano_sites <- function(
+get_diffbind_volcano_data <- function(
     dba_object,
     contrast_number=1,
     fdr_threshold=0.05,
-    xdiff=5,
-    ymax=40
+    xdiff=3,
+    ymax=20
 ){
-  print("For all sites:")
-  sites <- get_DBsites(dba_object,
+  sites <- get_diffbind_sites(dba_object,
                       fdr_threshold = 1,
-                      contrast_number = contrast_number)
-  print("For significant sites:")
-  sig.sites <- get_DBsites(dba_object,
+                      contrast_number = contrast_number,
+                      verbose = FALSE)
+  sig.sites <- get_diffbind_sites(dba_object,
                           fdr_threshold = fdr_threshold,
-                          contrast_number = contrast_number)
+                          contrast_number = contrast_number,
+                          verbose = FALSE)
 
   downsampled_nonsig_sites <- sites %>%
     filter(FDR > fdr_threshold) %>%
@@ -500,23 +522,23 @@ make_volcano_sites <- function(
 
 #' Create and save a volcano plot
 #'
-#' make_volcano_plot_diffbind(dba_object, figure_title, file_name, figure_save_path,
+#' make_diffbind_volcano_plot(dba_object, figure_title, save_name, save_directory,
 #' point_size, point_alpha, width, height, xdiff, ymax, contrast_number, fdr_threshold, color)
 #' generates volcano plot and returns the ggplot object and it also saves the file
 #' under the designated figure file path.
 #'
 #' @param dba_object DBA object (RDS format) generated by \code{perform_diffbind()}.
 #' @param figure_title Character. Figure title for volcano plot, ex. "h3k27me3 cKO vs cHET"
-#' @param file_name Character. Base name for the output volcano plot figures.
-#' @param figure_save_path Character. Directory path where the output plots will
+#' @param save_name Character. Base name for the output volcano plot figures.
+#' @param save_directory Character. Directory path where the output plots will
 #' be saved. Default is \code{NULL}.
 #' @param point_size Numeric. Size of the points in volcano plots, default is set to 1.
 #' @param point_alpha Numeric. Transparency level of the points. Ranges from 0 (fully
 #' transparent) to 1 (fully opaque). Default is \code{1}.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
-#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is \code{5}.
-#' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}. Default is \code{40}.
+#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.
+#' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}. 
 #' @param contrast_number Integer. Index indicating which contrast to extract from
 #' the DBA object. Defeault is set to \code{1}.
 #' @param fdr_threshold Numeric. The FDR threshold used for grouping, default is \code{0.05}.
@@ -526,42 +548,42 @@ make_volcano_sites <- function(
 #' @keywords volcano plot
 #' @export
 #' @examples
-#' make_volcano_plot_diffbind(
+#' make_diffbind_volcano_plot(
 #'   dba_object = dba.obj,
 #'   figure_title = "h3k27ac cKO vs cHET",
-#'   figure_save_path = "diffbind_figures",
-#'   file_name = "db_volcano")
+#'   save_directory = "diffbind_figures",
+#'   save_name = "db_volcano")
 
-make_volcano_plot_diffbind <- function(
+make_diffbind_volcano_plot <- function(
     dba_object,
     figure_title,
-    file_name,
-    figure_save_path=NULL,
+    save_name,
+    save_directory=NULL,
     point_size=1,
     point_alpha=1,
     width=8,
     height=6,
-    xdiff=5,
-    ymax=40,
+    xdiff=3,
+    ymax=20,
     contrast_number=1,
     fdr_threshold=0.05,
     color=c('aquamarine4', 'grey')
 ){
   #strip off extensions in the filename
-  if (tools::file_ext(file_name) != "") {
-    file_name <- tools::file_path_sans_ext(file_name)
-    warning("file name should not include any extensions, file name changed to: ", file_name)
+  if (tools::file_ext(save_name) != "") {
+    save_name <- tools::file_path_sans_ext(save_name)
+    warning("file name should not include any extensions, file name changed to: ", save_name)
   }
 
-  if (is.null(figure_save_path)) {
-    figure_save_path = getwd()
+  if (is.null(save_directory)) {
+    save_directory = getwd()
   }
 
   if (length(color) != 2) {
     stop("There should be 2 color choices.")
   }
 
-  volcano.sites <- make_volcano_sites(dba_object,
+  volcano.sites <- get_diffbind_volcano_data(dba_object,
                                       contrast_number = contrast_number,
                                       fdr_threshold = fdr_threshold,
                                       xdiff = xdiff,
@@ -578,21 +600,21 @@ make_volcano_plot_diffbind <- function(
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
-    filename = file.path(figure_save_path, file_name),
+    filename = file.path(save_directory, save_name),
     width = width, height = height, dpi = 600,
     plot = p
   )
 
   message("Volcano Plot is generated successfully. Results saved to: \n",
-          file.path(figure_save_path, paste0(file_name ,'.png')), " and \n",
-          file.path(figure_save_path, paste0(file_name ,'.pdf')))
+          file.path(save_directory, paste0(save_name ,'.png')), " and \n",
+          file.path(save_directory, paste0(save_name ,'.pdf')))
 
   return(p)
 }
 
 #' Merge Differential Binding and Expression Data
 #'
-#' merge_sites_with_DE(dba_object, DE_file_path, tss_file_path, save_path, contrast_number)
+#' merge_diffbind_with_DE(dba_object, DE_file_path, tss_file_path, save_directory, contrast_number)
 #' integrates differential binding sites with differential expression data (from bulk RNA-seq)
 #' by joining them based on their nearest gene TSS and returns a data frame where each row
 #' represents a differential binding site along with its nearest gene's differential expression.
@@ -603,7 +625,7 @@ make_volcano_plot_diffbind <- function(
 #' and \code{FDR}.
 #' @param tss_file_path Character. Transcription Start Site file path to be used in annotation
 #' with Differential binding sites.
-#' @param save_path Character. Directory path for storing intermediate files, including the TSS
+#' @param save_directory Character. Directory path for storing intermediate files, including the TSS
 #' BED file, sorted BED file, and nearest gene lookup TSV.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
 #' DBA object. Defeault is set to \code{1}.
@@ -618,17 +640,17 @@ make_volcano_plot_diffbind <- function(
 #' }
 #' @export
 #' @examples
-#' merge_sites_with_DE(
+#' merge_diffbind_with_DE(
 #'   dba_object = dba.obj,
 #'   DE_file_path = path_to_DE_csv_file,
 #'   tss_file_path = path_to_tss_file,
-#'   save_path = "diffbind_files")
+#'   save_directory = "diffbind_files")
 
-merge_sites_with_DE <- function(
+merge_diffbind_with_DE <- function(
     dba_object,
     DE_file_path,
     tss_file_path,
-    save_path,
+    save_directory,
     contrast_number=1
 ){
   if (is.null(DE_file_path) || !file.exists(DE_file_path)) {
@@ -648,26 +670,27 @@ merge_sites_with_DE <- function(
          paste(missing_cols, collapse = ", "))
   }
 
-  if (!dir.exists(save_path)) {
-    dir.create(save_path, recursive = TRUE)
+  if (!dir.exists(save_directory)) {
+    dir.create(save_directory, recursive = TRUE)
   }
 
-  sites <- get_DBsites(dba_object = dba_object,
+  sites <- get_diffbind_sites(dba_object = dba_object,
                        fdr_threshold = 1,
-                       contrast_number = contrast_number)
+                       contrast_number = contrast_number,
+                       verbose = FALSE)
 
   allDB.sites = sites %>%
     mutate(Score = -log10(FDR)) %>%
     tibble::rownames_to_column('site.id') %>%
     select(Chr, Start, End, site.id, Score)
 
-  write.table(allDB.sites, file = file.path(save_path, 'allDB_sites.bed'),
+  write.table(allDB.sites, file = file.path(save_directory, 'allDB_sites.bed'),
               quote = FALSE, sep = '\t',
               row.names = FALSE, col.names = FALSE)
 
   # run bash commands to retrieve the nearest gene ID
-  allDB_bed <- file.path(save_path, "allDB_sites.bed")
-  lookup_tsv <- file.path(save_path, "DB_site_nearest_gene_lookup.tsv")
+  allDB_bed <- file.path(save_directory, "allDB_sites.bed")
+  lookup_tsv <- file.path(save_directory, "DB_site_nearest_gene_lookup.tsv")
   sorted_bed <- tempfile(pattern = "sorted_allDB_sites_", fileext = ".bed")
 
   cmd <- sprintf(
@@ -706,18 +729,18 @@ merge_sites_with_DE <- function(
 
 #' Make Volcano Plot from DB and DE Data (Color by DE logFC direction)
 #'
-#' make_volcano_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
+#' make_volcano_plot_from_merged(merged_df, figure_title, save_directory, save_name,
 #' xdiff, ymax, point_size, point_alpha, width, height, DB_fdr_cutoff, DE_fdr_cutoff,
 #' color) creates and saves a volcano plot based on merged DB and DE data. All sites
 #' are shown in gray; DB sites mapped to significant DE genes are colored by direction
 #' of DE logFC (Up/Down).
 #'
-#' @param merged_df Merged data generated from running \code{merge_sites_with_DE()}
+#' @param merged_df Merged data generated from running \code{merge_diffbind_with_DE()}
 #' @param figure_title Character. The title of the volcano plot.
-#' @param figure_save_path Character. The path to save the volcano plot.
-#' @param file_name Character. Output figure file_name (e.g., "volcano.png").
-#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Default is \code{5}.
-#' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}. Default is \code{40}.
+#' @param save_directory Character. The path to save the volcano plot.
+#' @param save_name Character. Output figure save_name (e.g., "volcano.png").
+#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.
+#' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}.
 #' @param point_size Numeric. Point size in the plot. Default is \code{1}.
 #' @param point_alpha Numeric. Transparency level of the points. Ranges from 0 (fully
 #' transparent) to 1 (fully opaque). Default is \code{1}.
@@ -735,16 +758,16 @@ merge_sites_with_DE <- function(
 #' make_volcano_plot_from_merged(
 #'   merged_df = merged_volcano,
 #'   figure_title = 'cKO vs cHet Differential Binding sites',
-#'   figure_save_path = "diffbind_figures",
-#'   file_name = "db_volcano_DE_color_binary")
+#'   save_directory = "diffbind_figures",
+#'   save_name = "db_volcano_DE_color_binary")
 
 make_volcano_plot_from_merged <- function(
     merged_df,
     figure_title,
-    figure_save_path,
-    file_name,
-    xdiff=5,
-    ymax=40,
+    save_directory,
+    save_name,
+    xdiff=3,
+    ymax=20,
     point_size=1,
     point_alpha=1,
     width = 8,
@@ -762,9 +785,9 @@ make_volcano_plot_from_merged <- function(
   }
 
   #strip off extensions in the filename
-  if (tools::file_ext(file_name) != "") {
-    file_name <- tools::file_path_sans_ext(file_name)
-    warning("file name should not include any extensions, file name changed to: ", file_name)
+  if (tools::file_ext(save_name) != "") {
+    save_name <- tools::file_path_sans_ext(save_name)
+    warning("file name should not include any extensions, file name changed to: ", save_name)
   }
 
   if (length(color) != 2) {
@@ -807,7 +830,7 @@ make_volcano_plot_from_merged <- function(
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
-    filename = file.path(figure_save_path, file_name),
+    filename = file.path(save_directory, save_name),
     width = width, height = height, dpi = 600,
     plot = p
   )
@@ -817,15 +840,15 @@ make_volcano_plot_from_merged <- function(
 
 #' Create and save the scattor plot from DB and DE Data
 #'
-#' make_scatter_plot_from_merged(merged_df, figure_title, figure_save_path, file_name,
+#' make_scatter_plot_from_merged(merged_df, figure_title, save_directory, save_name,
 #' width, height, point_size, regression, DB_fdr_cutoff, DE_fdr_cutoff, point_color,
 #' line_color) create and saves scatter plot from merged DB and DE data and save the
 #' plot under designated directory.
 #'
-#' @param merged_df Merged data generated from running \code{merge_sites_with_DE()}
+#' @param merged_df Merged data generated from running \code{merge_diffbind_with_DE()}
 #' @param figure_title Character. The scatter plot title.
-#' @param figure_save_path Character. Directory to save the figure output.
-#' @param file_name Character. The base name of the scatter plot file.
+#' @param save_directory Character. Directory to save the figure output.
+#' @param save_name Character. The base name of the scatter plot file.
 #' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
 #' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
 #' @param point_size Numeric. The size of the point in scatter plot. Default is 1.
@@ -845,14 +868,14 @@ make_volcano_plot_from_merged <- function(
 #' make_scatter_plot_from_merged(
 #'   merged_df = merged_df,
 #'   figure_title = "DB vs DE log2FC",
-#'   figure_save_path = "diffbind_figures",
-#'   file_name = "db_DE_scatter")
+#'   save_directory = "diffbind_figures",
+#'   save_name = "db_DE_scatter")
 
 make_scatter_plot_from_merged <- function(
     merged_df,
     figure_title,
-    figure_save_path,
-    file_name,
+    save_directory,
+    save_name,
     width=8,
     height=6,
     point_size=1,
@@ -871,9 +894,9 @@ make_scatter_plot_from_merged <- function(
   }
 
   #strip off extensions in the filename
-  if (tools::file_ext(file_name) != "") {
-    file_name <- tools::file_path_sans_ext(file_name)
-    warning("file name should not include any extensions, file name changed to: ", file_name)
+  if (tools::file_ext(save_name) != "") {
+    save_name <- tools::file_path_sans_ext(save_name)
+    warning("file name should not include any extensions, file name changed to: ", save_name)
   }
 
   # exclude rows with NA Values in any column
@@ -911,7 +934,7 @@ make_scatter_plot_from_merged <- function(
 
   #save the plot
   kwanlibr::ggsave_vector_raster(
-    filename = file.path(figure_save_path, file_name),
+    filename = file.path(save_directory, save_name),
     width = width, height = height, dpi = 600,
     plot = p
   )
