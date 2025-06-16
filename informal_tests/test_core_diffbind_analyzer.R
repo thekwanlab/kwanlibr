@@ -16,7 +16,7 @@ dba.obj <- perform_diffbind(sample_sheet_path = samplecsv,
 # ==============
 save_diffbind_object(dba_object=dba.obj,
                      file_suffix = "h3k27ac",
-                     save_directory = "informal_tests/test_results")
+                     save_directory = config$paths$test_results_dump)
 
 # ==============
 # Test get_diffbind_sites
@@ -37,21 +37,21 @@ save_diffbind_sites(dba.obj,
 make_diffbind_density_plot(dba.obj,
                            figure_title="Distribution of Differential Binding Regions",
                            save_name="df_fold_density_h3k27ac",
-                           save_directory = paste0(config$paths$test_results_dump, "diffbind_figures"))
+                           save_directory = config$paths$test_results_dump)
 
 make_diffbind_density_plot(dba.obj,
                            figure_title="Distribution of Differential Binding Regions",
                            save_name="df_fold_density_h3k27ac",
-                           save_directory = paste0(config$paths$test_results_dump, "diffbind_figures"),
+                           save_directory = config$paths$test_results_dump,
                            xdiff = 1)
 
 #===============
 # Test make_diffbind_PCA_plot
 #===============
 make_diffbind_PCA_plot(dba.obj,
-                       figure_title_nocontrast="All consensus Peaks: h3k27ac HET vs KO",
+                       figure_title_nocontrast="All consensus Peaks: h3k27ac",
                        figure_title_contrast="'Differential Binding Peaks: h3k27ac HET vs KO'",
-                       save_directory=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                       save_directory=config$paths$test_results_dump,
                        save_name="PCA_consensus_vs_diffbind_peaks_kwanlib_h3k27ac")
 
 #===============
@@ -65,7 +65,7 @@ volcano.sites <- get_diffbind_volcano_data(dba.obj, xdiff=1, ymax=10)
 make_diffbind_volcano_plot(dba.obj,
                            figure_title="h3k27ac cKO vs cHET",
                            save_name="db_volcano_h3k27ac",
-                           save_directory=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                           save_directory=config$paths$test_results_dump,
                            point_size = 2,
                            point_alpha = 0.8)
 #================
@@ -76,18 +76,18 @@ options(scipen = 15)
 merged_data <- merge_diffbind_with_DE(dba.obj,
                                       DE_file_path = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
                                       tss_file_path = "/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/TSS.bed",
-                                      save_directory = paste0(config$paths$test_results_dump, "diffbind_files_me1"))
+                                      save_directory = config$paths$test_results_dump)
 
 merged_data <- merge_diffbind_with_DE(dba.obj,
                                       DE_file_path = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
                                       tss_file_path = "/nfs/turbo/umms-kykwan/projects/reference/tss/TSS_mm10_gencode.bed",
-                                      save_directory = paste0(config$paths$test_results_dump, "diffbind_files_me1"))
+                                      save_directory = config$paths$test_results_dump)
 #=================
-# Test make_volcano_plot_from_merged
+# Test make_diffbind_volcano_plot_from_merged
 #=================
-make_volcano_plot_from_merged(merged_df = merged_data,
+make_diffbind_volcano_plot_from_merged(merged_df = merged_data,
                               figure_title=paste0('cKO vs cHet Differential Binding sites', '\n[ color by nearest TSS bulkRNAseq logFC, filtered by bulkRNAseq FDR < 0.05 ]'),
-                              save_directory=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                              save_directory=config$paths$test_results_dump,
                               save_name="db_volcano_bulk_color_binary_h3k4me1",
                               xdiff = 2,
                               ymax = 17.5,
@@ -101,7 +101,7 @@ make_volcano_plot_from_merged(merged_df = merged_data,
 #=================
 make_scatter_plot_from_merged(merged_df = merged_data,
                               figure_title ="DB sites log2FC vs Nearby Gene RNAseq log2FC",
-                              save_directory=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                              save_directory=config$paths$test_results_dump,
                               save_name="db_bulk_scatter_h3k4me1",
                               width = 8,
                               height = 6,
@@ -109,7 +109,7 @@ make_scatter_plot_from_merged(merged_df = merged_data,
 
 make_scatter_plot_from_merged(merged_df = merged_data,
                               figure_title ="DB sites log2FC vs Nearby Gene RNAseq log2FC",
-                              save_directory=paste0(config$paths$test_results_dump, "diffbind_figures"),
+                              save_directory=config$paths$test_results_dump,
                               save_name="db_bulk_scatter_no_regression_line_h3k4me1",
                               width = 8,
                               height = 6,

@@ -146,9 +146,11 @@ draw_PCA <- function(data,
     p <- ggplot(pcaData, aes(x = PC1, y = PC2, color = Group)) +
       geom_point(size = 2)
   }
-  p <- p + xlab(paste0("PC1: ", VoPC1)) +
+  p <- p + 
+    xlab(paste0("PC1: ", VoPC1)) +
     ylab(paste0("PC2: ", VoPC2)) +
-    theme_minimal()
+    theme_minimal() +
+    theme(aspect.ratio = 1.0)
 
   if (!is.null(color)) {
     p <- p + scale_color_manual(values=color)

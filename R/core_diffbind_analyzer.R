@@ -215,7 +215,9 @@ save_diffbind_sites <- function(
     fdr_threshold = 0.05,
     contrast_number = 1
 ){
-  options(scipen = 99) 
+  old.scipen = options('scipen')
+  options(scipen = 99)
+
   if (is.null(save_directory)) {
     save_directory <- getwd()
   }
@@ -285,6 +287,7 @@ save_diffbind_sites <- function(
     downDB_sites_file_name,
     consensus_sites_file_name,
     sep='\n'))
+  options(scipen = old.scipen)
 }
 
 #' Create and save a density plot
@@ -432,28 +435,18 @@ make_diffbind_PCA_plot <- function(
   df_nocontrast_pre <- data.frame(dba.peakset(dba_object, bRetrieve = TRUE))
   df_nocontrast <- t(df_nocontrast_pre[,6:ncol(df_nocontrast_pre)])
   df_label <- dba_object$samples$Condition
-  PoV_nocontrast_rank <- prcomp(df_nocontrast, center = TRUE)$sdev^2
-  sum_pc_nocontrast <- sum(PoV_nocontrast_rank[1:2])
-  legend_label <- paste0("Sum of variance of 2 PCs: ", sum_pc_nocontrast)
   p1 <- kwanlibr::draw_PCA(df_nocontrast, label=df_label, color=color) +
     geom_point(size = point_size) +
-    labs(caption = legend_label) +
     ggtitle(figure_title_nocontrast) +
-    theme(aspect.ratio = 1) +
     theme_bw()
 
   # For all DB regions:
   df_contrast_pre <- dba.report(dba_object, bCounts = TRUE)
   df_contrast <- t(df_contrast_pre[,10:ncol(df_contrast_pre)])
   rownames(df_contrast) <- NULL
-  PoV_contrast_rank <- prcomp(df_contrast, center = TRUE)$sdev^2
-  sum_pc_contrast <- sum(PoV_contrast_rank[1:2])
-  legend_label <- paste0("Sum of variance of 2 PCs: ", sum_pc_contrast)
   p2 <- kwanlibr::draw_PCA(df_contrast, label = df_label, color=color) +
     geom_point(size = point_size) +
-    labs(caption = legend_label) +
     ggtitle(figure_title_contrast) +
-    theme(aspect.ratio = 1) +
     theme_bw()
 
   #combine two plots into one
@@ -595,6 +588,7 @@ make_diffbind_volcano_plot <- function(
     scale_color_manual(values = color) +
     xlim(-xdiff, xdiff) +
     ylim(0, ymax) +
+    theme(aspect.ratio = 1.0) +
     labs(x = TeX('$\\log_2$ FC'),
          y = TeX('$-\\log_{10}$ FDR'),
          title = figure_title)
@@ -685,10 +679,12 @@ merge_diffbind_with_DE <- function(
     tibble::rownames_to_column('site.id') %>%
     select(Chr, Start, End, site.id, Score)
 
+  old.scipen = options('scipen')
   options(scipen = 99) # (practically) disable scientific notation in output
   write.table(allDB.sites, file = file.path(save_directory, 'allDB_sites.bed'),
               quote = FALSE, sep = '\t',
               row.names = FALSE, col.names = FALSE)
+  options(scipen = old.scipen)
 
   # run bash commands to retrieve the nearest gene ID
   allDB_bed <- file.path(save_directory, "allDB_sites.bed")
@@ -727,7 +723,7 @@ merge_diffbind_with_DE <- function(
 
 #' Make Volcano Plot from DB and DE Data (Color by DE logFC direction)
 #'
-#' make_volcano_plot_from_merged(merged_df, figure_title, save_directory, save_name,
+#' make_diffbind_volcano_plot_from_merged(merged_df, figure_title, save_directory, save_name,
 #' xdiff, ymax, point_size, point_alpha, width, height, DB_fdr_cutoff, DE_fdr_cutoff,
 #' color) creates and saves a volcano plot based on merged DB and DE data. All sites
 #' are shown in gray; DB sites mapped to significant DE genes are colored by direction
@@ -753,13 +749,13 @@ merge_diffbind_with_DE <- function(
 #' @return A ggplot object of DB and DE merged volcano plot
 #' @export
 #' @examples
-#' make_volcano_plot_from_merged(
+#' make_diffbind_volcano_plot_from_merged(
 #'   merged_df = merged_volcano,
 #'   figure_title = 'cKO vs cHet Differential Binding sites',
 #'   save_directory = "diffbind_figures",
 #'   save_name = "db_volcano_DE_color_binary")
 
-make_volcano_plot_from_merged <- function(
+make_diffbind_volcano_plot_from_merged <- function(
     merged_df,
     figure_title,
     save_directory,
@@ -821,6 +817,7 @@ make_volcano_plot_from_merged <- function(
     scale_colour_manual(values = color, na.value='grey') +
     xlim(-xdiff, xdiff) +
     ylim(0, ymax) +
+    theme(aspect.ratio = 1.0) +
     labs(x = TeX('$\\log_2$( differential binding FC )'),
          y = TeX('$-\\log_{10}$( differential binding FDR )'),
          colour = 'bulkRNAseq FC',
@@ -920,6 +917,7 @@ make_scatter_plot_from_merged <- function(
   p <- p +
     xlim(c(-1,1) * max(abs(sig_merged_df$DB.logFC))) +
     ylim(c(-1,1) * max(abs(sig_merged_df$DE.logFC))) +
+    theme(aspect.ratio = 1.0) +
     labs(x = TeX('Differential Binding Region $\\log_2$FC'),
          y = TeX('Nearby Gene RNAseq $\\log_2$FC'),
          title = figure_title)
