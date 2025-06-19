@@ -104,7 +104,19 @@ perform_edger <- function(
   filePrefix <- gsub("/+$", "", filePrefix)
 
   if (class(gtf) == "character") {
-    paste0("Getting GTF from ", gtf)
+  }
+
+  if (any(fs::is_absolute_path(sampleTable[[fileCol]]))) {
+    message('Absolute file paths detected')
+  } 
+  else {
+    message(paste('Relative file paths detected. Searching for files in', filePrefix))
+    if (class(filePrefix) == "NULL") {
+      filePrefix <- getwd()
+    }
+    filePrefix <- gsub("/+$", "", filePrefix)
+    sampleTable[[fileCol]] = file.path(filePrefix, sampleTable[[fileCol]])
+  } 
     gtf <- kwanlibr::get_gtf(gtf)
   }
   else if (class(gtf) != "data.frame") {
