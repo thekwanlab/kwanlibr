@@ -16,10 +16,9 @@
 #' @import DiffBind
 #' @import dplyr
 #' @import ggplot2
-#' @import cowplot
-#' @import latex2exp
-#' @import gtools
-#' @import tibble
+#' @importFrom tibble rownames_to_column
+#' @importFrom latex2exp TeX
+#' @importFrom gtools mixedorder
 
 #---------------------
 # Functions
@@ -396,7 +395,7 @@ make_diffbind_density_plot <- function(
 #' in PCA plots. Default is \code{c("darkmagenta", "aquamarine4")}.
 #' @return A \code{gridExtra} object containing a side-by-side layout of two PCA plots.
 #' @keywords PCA plot
-#' @import gridExtra
+#' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
 #' make_diffbind_PCA_plot(

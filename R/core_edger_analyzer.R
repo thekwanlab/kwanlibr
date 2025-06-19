@@ -16,7 +16,6 @@
 #' @import edgeR
 #' @import rtracklayer
 #' @import org.Mm.eg.db
-#' @import data.table
 #' @import ggrepel
 
 #constants
@@ -98,12 +97,12 @@ perform_edger <- function(
   gtf=NULL,
   saveName=NULL
 ) {
-  if (class(filePrefix) == "NULL") {
-    filePrefix <- getwd()
-  }
-  filePrefix <- gsub("/+$", "", filePrefix)
-
   if (class(gtf) == "character") {
+    paste0("Getting GTF from ", gtf)
+    gtf <- kwanlibr::get_gtf(gtf)
+  }
+  else if (class(gtf) != "data.frame") {
+    stop("Provide a GTF with kwanlibr::get_gtf()")
   }
 
   if (any(fs::is_absolute_path(sampleTable[[fileCol]]))) {
@@ -117,23 +116,18 @@ perform_edger <- function(
     filePrefix <- gsub("/+$", "", filePrefix)
     sampleTable[[fileCol]] = file.path(filePrefix, sampleTable[[fileCol]])
   } 
-    gtf <- kwanlibr::get_gtf(gtf)
-  }
-  else if (class(gtf) != "data.frame") {
-    stop("Provide a GTF with kwanlibr::get_gtf()")
-  }
 
   if(class(batchCol) == "NULL"){
     sampleTable <- data.frame(
       sampleName = sampleTable[[idCol]],
-      files = file.path(filePrefix, sampleTable[[fileCol]]),
+      files = sampleTable[[fileCol]],
       condition = sampleTable[[condCol]]
     )
   }
   else{
     sampleTable <- data.frame(
       sampleName = sampleTable[[idCol]],
-      files = file.path(filePrefix, sampleTable[[fileCol]]),
+      files = sampleTable[[fileCol]],
       condition = sampleTable[[condCol]],
       batch = sampleTable[[batchCol]]
     )

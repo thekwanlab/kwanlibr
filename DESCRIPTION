@@ -1,6 +1,6 @@
 Package: kwanlibr
 Title: edgeR wrapper for simple differential expression analysis
-Version: 1.4.0.9003
+Version: 1.4.1
 Authors@R: 
     c(
         person("Yaman", "Qalieh", , "yamanq@umich.edu", role = c("aut", "cre"),
@@ -19,8 +19,14 @@ License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+biocViews:
 Imports:
     ggplot2,
+    gridExtra,
     rtracklayer,
-    data.table,
-    ggrepel
+    org.Mm.eg.db,
+    ggrepel,
+    DiffBind,
+    edgeR,
+    latex2exp,
+    gtools
