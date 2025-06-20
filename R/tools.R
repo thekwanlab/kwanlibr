@@ -86,58 +86,58 @@ clamp <- function(
 #'
 #' @param data A data-matrix or data-frame, where the rows of the data should be
 #' observations, and columns should be numerical variables
-#' @param label A vector that contains assigned groups of the sample, the 
-#' length of the vector should be the same as the number of samples in the df 
-#' @param color A vector that contains colors of the choice, the length of 
-#' the vector should be equal to the number of unique elements in label. By 
+#' @param label A vector that contains assigned groups of the sample, the
+#' length of the vector should be the same as the number of samples in the df
+#' @param color A vector that contains colors of the choice, the length of
+#' the vector should be equal to the number of unique elements in label. By
 #' default, use ggplot default colors
-#' @param legend Boolean values, if True, draw the legend on the PCA, if false, 
+#' @param legend Boolean values, if True, draw the legend on the PCA, if false,
 #' no legend. Default is set to TRUE
 #' @return A ggplot object of PCA
-#' 
+#'
 #' @import ggplot2
-#' 
+#'
 #' @export
-#' 
+#'
 #' @examples
 #' draw_PCA(iris[-5], label = iris$Species, color = c("green", "blue", "yellow"))
 #' draw_PCA(iris[-5], label_list = iris$Species)
 #' draw_PCA(iris[-5], legend=FALSE)
 #' draw_PCA(iris[-5]) # if no label_list, no legend is produced
 
-draw_PCA <- function(data, 
-                     label=NULL, 
-                     color=NULL, 
+draw_PCA <- function(data,
+                     label=NULL,
+                     color=NULL,
                      legend=TRUE){
   #Check if data has non-numerical columns
   if (!all(sapply(data, is.numeric))) {
     stop("Check the structure of the data, make sure data only contains numerical inputs.")
   }
-  
+
   # Validate length of label if provided
   if (!is.null(label) && length(label) != nrow(data)) {
     stop("Check the label, make sure the length matches the number of samples in data.")
   }
-  
+
   # Validate color if label is provided
   if (!is.null(label) && !is.null(color) && length(color) != length(unique(label))) {
-    stop("Check the color, make sure the number of distinct colors matches the 
+    stop("Check the color, make sure the number of distinct colors matches the
          number of unique labels in label.")
   }
   pca_result <- prcomp(data,center = TRUE)
-  
+
   #Build a data frame
   pcaData <- as.data.frame(pca_result$x)
-  
+
   if (!is.null(label)) {
     pcaData$Group <- label # add group to df
   }
-  
+
   # Calculate % Variance Explained
   PoV <- pca_result$sdev^2 / sum(pca_result$sdev^2)
   VoPC1 <- sprintf("%.2f%%", PoV[1] * 100)
   VoPC2 <- sprintf("%.2f%%", PoV[2] * 100)
-  
+
   # Create the plot
   if (is.null(label)) {
     p <- ggplot(pcaData, aes(x = PC1, y = PC2)) +
@@ -146,10 +146,12 @@ draw_PCA <- function(data,
     p <- ggplot(pcaData, aes(x = PC1, y = PC2, color = Group)) +
       geom_point(size = 2)
   }
-  p <- p + xlab(paste0("PC1: ", VoPC1)) +
+  p <- p + 
+    xlab(paste0("PC1: ", VoPC1)) +
     ylab(paste0("PC2: ", VoPC2)) +
-    theme_minimal()
-  
+    theme_minimal() +
+    theme(aspect.ratio = 1.0)
+
   if (!is.null(color)) {
     p <- p + scale_color_manual(values=color)
   }
