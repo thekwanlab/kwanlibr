@@ -875,7 +875,7 @@ make_scatter_plot_from_merged <- function(
     point_size=1,
     regression=TRUE,
     DB_fdr_cutoff=0.05,
-    DE_fdr_cutoff=1,
+    DE_fdr_cutoff=0.05,
     point_color='black',
     line_color='aquamarine4'
 ){
