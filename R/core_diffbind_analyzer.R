@@ -851,7 +851,7 @@ make_diffbind_volcano_plot_from_merged <- function(
 #' @param DB_fdr_cutoff Numeric. Significance threshold for FDR in differential binding
 #' dataframe. Default is 0.05.
 #' @param DE_fdr_cutoff Numeric. Significance threshold for FDR in RNA-seq differential
-#' expression. Defualt is 1.
+#' expression. Default is 1.
 #' @param point_color Character Value. The color of the point. Default is \code{'black'}.
 #' @param line_color Character Value. The color of the regression line. Default is
 #' \code{'aquamarine4'}.
