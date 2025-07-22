@@ -8,7 +8,7 @@ devtools::load_all(config$paths$package)
 
 gtf = kwanlibr::get_gtf(config$paths$gtf)
 
-samples = read.table(config$paths$samples_example, header=TRUE, sep=',')
+samples = read.table(config$paths$gene_expression_samples_example, header=TRUE, sep=',')
 Filename = c("1395-ML-1_AGTCAA-TAGATC_S156.tsv",
              "1395-ML-1_AGTTCC-TAGATC_S157.tsv",
              "1395-ML-1_ATGTCA-TAGATC_S158.tsv",
@@ -38,10 +38,10 @@ exp_samples = kwanlibr::label_control_samples(exp_samples, 'Condition', 'ctrl')
 # GTF object
 lrt = kwanlibr::perform_edger(
   exp_samples,
-  filePrefix = config$paths$gene_counts_dir,
+  filePrefix = config$paths$gene_expression_gene_counts_dir,
   idCol = 'Pool.Name',
   gtf=gtf,
-  saveName = paste0(config$paths$test_results_dump, 'edger_lrt')
+  saveName = paste0(config$paths$test_results_dump, '/', 'edger_lrt')
 )
 
 # GTF file path
@@ -50,7 +50,7 @@ lrt = kwanlibr::perform_edger(
   filePrefix = config$paths$gene_counts_dir,
   idCol = 'Pool.Name',
   gtf=config$paths$gtf,
-  saveName = paste0(config$paths$test_results_dump, 'edger_lrt')
+  saveName = paste0(config$paths$test_results_dump, '/', 'edger_lrt')
 )
 
 # no GTF
@@ -58,7 +58,7 @@ lrt = kwanlibr::perform_edger(
   exp_samples,
   filePrefix = config$paths$gene_counts_dir,
   idCol = 'Pool.Name',
-  saveName = paste0(config$paths$test_results_dump, 'edger_lrt')
+  saveName = paste0(config$paths$test_results_dump, '/', 'edger_lrt')
 )
 
 # ===================
@@ -118,13 +118,13 @@ kwanlibr::make_MA_plot(
 # Test make_PCA_plot
 # ==============
 
-make_PCA_plot(lrt, color = c("blue", "red"), figure_title = "Principal Component Analysis", 
+make_PCA_plot(lrt, color = c("blue", "red"), figure_title = "Principal Component Analysis",
               figure_dir = config$paths$test_results_dump, filename = "plot_assigned_color_and_legend")
-make_PCA_plot(lrt, legend = FALSE, figure_title = "Principal Component Analysis", 
+make_PCA_plot(lrt, legend = FALSE, figure_title = "Principal Component Analysis",
               figure_dir = config$paths$test_results_dump, filename = "plot_default_color_no_legend")
-make_PCA_plot(lrt, figure_title = "Principal Component Analysis", 
+make_PCA_plot(lrt, figure_title = "Principal Component Analysis",
               figure_dir = config$paths$test_results_dump, filename = "plot_default_color_and_legend")
-make_PCA_plot(lrt, label = TRUE, figure_title = "Principal Component Analysis", 
+make_PCA_plot(lrt, label = TRUE, figure_title = "Principal Component Analysis",
               figure_dir = config$paths$test_results_dump, filename = "plot_labels_default_color_and_legend")
-make_PCA_plot(lrt, figure_title = "Principal Component Analysis", 
+make_PCA_plot(lrt, figure_title = "Principal Component Analysis",
               figure_dir = config$paths$test_results_dump, filename = "plot_no_labels_default_color_and_legend")
