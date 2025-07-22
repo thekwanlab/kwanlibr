@@ -41,7 +41,7 @@ drawn to the scatter plot. otherwise no regression line.}
 dataframe. Default is 0.05.}
 
 \item{DE_fdr_cutoff}{Numeric. Significance threshold for FDR in RNA-seq differential
-expression. Defualt is 0.05.}
+expression. Default is 1.}
 
 \item{point_color}{Character Value. The color of the point. Default is \code{'black'}.}
 
