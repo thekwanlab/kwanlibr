@@ -7,8 +7,8 @@
 make_diffbind_PCA_plot(
   dba_object,
   figure_title_nocontrast,
-  figure_title_contrast,
   save_name,
+  figure_title_contrast = NULL,
   save_directory = NULL,
   point_size = 8,
   width = 20,
@@ -22,10 +22,10 @@ make_diffbind_PCA_plot(
 \item{figure_title_nocontrast}{Character. Title for the PCA plot using all consensus
 regions.}
 
-\item{figure_title_contrast}{Character. Title for the PCA plot using only differentially
-bound regions.}
-
 \item{save_name}{Character. Base name (without extension) for the saved plot files.}
+
+\item{figure_title_contrast}{Character. Title for the PCA plot using only differentially
+bound regions. Default is \code{NULL}.}
 
 \item{save_directory}{Character. Directory path where output plots will be saved.}
 
