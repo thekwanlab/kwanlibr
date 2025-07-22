@@ -510,9 +510,9 @@ get_diffbind_volcano_data <- function(
     mutate(negLogFDR = -log10(FDR)) %>%
     mutate(Fold = kwanlibr::clamp(Fold, -xdiff, xdiff),
            negLogFDR = kwanlibr::clamp(negLogFDR, 0, ymax)) %>%
-    mutate(FDR = if_else(FDR <= fdr_threshold,
-                         paste('<=',fdr_threshold),
-                         paste('>',fdr_threshold)))
+    mutate(FDR_is_significant = if_else(FDR <= fdr_threshold,
+                                        paste('<=',fdr_threshold),
+                                        paste('>',fdr_threshold)))
   return(volcano.sites)
 }
 
@@ -585,7 +585,7 @@ make_diffbind_volcano_plot <- function(
                                       xdiff = xdiff,
                                       ymax = ymax)
 
-  p <- ggplot(data = volcano.sites, aes(x = Fold, y = negLogFDR, color = FDR)) +
+  p <- ggplot(data = volcano.sites, aes(x = Fold, y = negLogFDR, color = FDR_is_significant)) +
     geom_point(size = point_size, alpha = point_alpha) +
     scale_color_manual(values = color) +
     xlim(-xdiff, xdiff) +
