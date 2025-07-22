@@ -438,18 +438,34 @@ make_diffbind_PCA_plot <- function(
   df_nocontrast <- t(df_nocontrast_pre[,6:ncol(df_nocontrast_pre)])
   df_label <- dba_object$samples$Condition
   p1 <- kwanlibr::draw_PCA(df_nocontrast, label=df_label, color=color) +
+    theme_bw() +
     geom_point(size = point_size) +
     ggtitle(figure_title_nocontrast) +
-    theme_bw()
+    theme(plot.title = element_text(size=20),
+          legend.text = element_text(size=20),
+          legend.title = element_text(size=20),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title = element_text(size=20))
 
   # For all DB regions:
   df_contrast_pre <- dba.report(dba_object, bCounts = TRUE)
   df_contrast <- t(df_contrast_pre[,10:ncol(df_contrast_pre)])
   rownames(df_contrast) <- NULL
   p2 <- kwanlibr::draw_PCA(df_contrast, label = df_label, color=color) +
+    theme_bw() +
     geom_point(size = point_size) +
     ggtitle(figure_title_contrast) +
-    theme_bw()
+    theme(plot.title = element_text(size=20),
+          legend.text = element_text(size=20),
+          legend.title = element_text(size=20),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title = element_text(size=20))
 
   #combine two plots into one
   p <- gridExtra::grid.arrange(p1, p2, nrow=1)
