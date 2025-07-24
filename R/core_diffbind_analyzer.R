@@ -818,6 +818,28 @@ make_diffbind_volcano_plot_from_merged <- function(
   return(p)
 }
 
+#' Create and return a GLM object from DB and DE Data
+#'
+#' DB_DE_regression_model(merged_df) fits a generalized linear model (GLM) to test
+#' the association between DE and DB data. It regresses \code{DE.logFC} against
+#' \code{DB.logFC} in a merged data frame.
+#'
+#' @param merged_df Merged data generated from running \code{merge_diffbind_with_DE()}
+#' @return An object of class inheriting from 'glm'
+#' @details The summary of the regression is printed to the console.
+#' @export
+#' @examples
+#' DB_DE_regression_model(merged_df = merged_df)
+
+DB_DE_regression_model <- function(
+    merged_df
+){
+  regression <- glm(DE.logFC ~ DB.logFC, data = merged_df)
+
+  print(summary(regression))
+  return(regression)
+}
+
 #' Create and save the scattor plot from DB and DE Data
 #'
 #' make_scatter_plot_from_merged(merged_df, figure_title, save_directory, save_name,
@@ -885,12 +907,8 @@ make_scatter_plot_from_merged <- function(
                size = point_size)
 
   if (regression) {
-    db.DE.scatter.regression = glm(DE.logFC ~ DB.logFC, data = sig_merged_df)
-    beta = summary(db.DE.scatter.regression)$coefficients['DB.logFC', 1]
-    p.val = summary(db.DE.scatter.regression)$coefficients['DB.logFC', 4]
+    db.DE.scatter.regression = DB_DE_regression_model(sig_merged_df)
     p <- p + geom_smooth(method = glm, color = line_color)
-
-    cat(paste0("beta = ", beta, "\np value = ", p.val, "\n"))
   }
 
   p <- p +
