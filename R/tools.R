@@ -36,6 +36,10 @@ ggsave_vector_raster <- function(
   raster_device = 'png',
   ...
 ) {
+  if (tools::file_ext(filename) != "") {
+    filename <- tools::file_path_sans_ext(filename)
+    warning("file name should not include any extensions, file name changed to: ", filename)
+  }
 
   ggplot2::ggsave(
     filename = paste0(filename, '.', vector_device),
@@ -51,6 +55,9 @@ ggsave_vector_raster <- function(
      height = height,
      ...
   )
+
+  message("Visualization is generated and saved successfully. Results saved to: \n",
+          paste0(filename ,'.png'), " and \n", paste0(filename ,'.pdf'))
 }
 
 #' clamp
@@ -146,7 +153,7 @@ draw_PCA <- function(data,
     p <- ggplot(pcaData, aes(x = PC1, y = PC2, color = Group)) +
       geom_point(size = 2)
   }
-  p <- p + 
+  p <- p +
     xlab(paste0("PC1: ", VoPC1)) +
     ylab(paste0("PC2: ", VoPC2)) +
     theme_minimal() +

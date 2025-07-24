@@ -334,12 +334,6 @@ make_diffbind_density_plot <- function(
     stop("A valid file name is required to be specified.")
   }
 
-  #strip off extensions in the filename
-  if (tools::file_ext(save_name) != "") {
-    save_name <- tools::file_path_sans_ext(save_name)
-    warning("file name should not include any extensions, file name changed to: ", save_name)
-  }
-
   if (is.null(save_directory)) {
     save_directory <- getwd()
   }
@@ -367,9 +361,6 @@ make_diffbind_density_plot <- function(
     plot = p
   )
 
-  message("Density Plot is generated successfully. Results saved to: \n",
-          file.path(save_directory, paste0(save_name ,'.png')), " and \n",
-          file.path(save_directory, paste0(save_name ,'.pdf')))
   return(p)
 }
 
@@ -418,11 +409,6 @@ make_diffbind_PCA_plot <- function(
 ){
   if (is.null(figure_title_contrast)) {
     figure_title_contrast <- paste(figure_title_nocontrast, "Differential Binding Sites")
-  }
-  #strip off extensions in the filename
-  if (tools::file_ext(save_name) != "") {
-    save_name <- tools::file_path_sans_ext(save_name)
-    warning("file name should not include any extensions, file base name changed to: ", save_name)
   }
 
   if (is.null(save_directory)) {
@@ -476,10 +462,6 @@ make_diffbind_PCA_plot <- function(
     width = width, height = height, dpi = 600,
     plot = p
   )
-
-  message("PCA Plot is generated successfully. Results saved to: \n",
-          file.path(save_directory, paste0(save_name ,'.png')), " and \n",
-          file.path(save_directory, paste0(save_name ,'.pdf')))
 
   return(p)
 }
@@ -581,11 +563,6 @@ make_diffbind_volcano_plot <- function(
     fdr_threshold=0.05,
     color=c('aquamarine4', 'grey')
 ){
-  #strip off extensions in the filename
-  if (tools::file_ext(save_name) != "") {
-    save_name <- tools::file_path_sans_ext(save_name)
-    warning("file name should not include any extensions, file name changed to: ", save_name)
-  }
 
   if (is.null(save_directory)) {
     save_directory = getwd()
@@ -617,10 +594,6 @@ make_diffbind_volcano_plot <- function(
     width = width, height = height, dpi = 600,
     plot = p
   )
-
-  message("Volcano Plot is generated successfully. Results saved to: \n",
-          file.path(save_directory, paste0(save_name ,'.png')), " and \n",
-          file.path(save_directory, paste0(save_name ,'.pdf')))
 
   return(p)
 }
@@ -796,12 +769,6 @@ make_diffbind_volcano_plot_from_merged <- function(
          paste(missing_cols, collapse = ", "))
   }
 
-  #strip off extensions in the filename
-  if (tools::file_ext(save_name) != "") {
-    save_name <- tools::file_path_sans_ext(save_name)
-    warning("file name should not include any extensions, file name changed to: ", save_name)
-  }
-
   if (length(color) != 2) {
     stop("There should be 2 color choices.")
   }
@@ -904,12 +871,6 @@ make_scatter_plot_from_merged <- function(
   if (length(missing_cols) > 0) {
     stop("The merged data is missing required column(s): ",
          paste(missing_cols, collapse = ", "))
-  }
-
-  #strip off extensions in the filename
-  if (tools::file_ext(save_name) != "") {
-    save_name <- tools::file_path_sans_ext(save_name)
-    warning("file name should not include any extensions, file name changed to: ", save_name)
   }
 
   # exclude rows with NA Values in any column
