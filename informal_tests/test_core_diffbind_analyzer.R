@@ -101,6 +101,16 @@ make_diffbind_volcano_plot_from_merged(merged_df = merged_data,
                               width = 8,
                               height = 6)
 
+# ==============
+# Test add_DB_DE_regression
+# ==============
+sig_merged_data <- merged_data %>%
+  na.omit() %>%
+  filter(DB.FDR < 0.05) %>%
+  filter(DE.FDR < 1)
+
+DB_DE_regression <- DB_DE_regression_model(merged_df = sig_merged_data)
+
 #=================
 # Test make_scatter_plot_from_merged
 #=================
