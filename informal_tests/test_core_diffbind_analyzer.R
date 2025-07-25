@@ -22,7 +22,7 @@ save_diffbind_object(dba_object=dba.obj,
 # Test get_diffbind_sites
 # ==============
 sig.sites <- get_diffbind_sites(dba_object=dba.obj, verbose = FALSE)
-
+sig.sites <- get_diffbind_sites(dba_object=dba.obj, fdr_threshold = 0.0)
 all.sites <- get_diffbind_sites(dba_object=dba.obj, fdr_threshold = 1)
 
 # ==============
