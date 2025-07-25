@@ -907,7 +907,9 @@ make_scatter_plot_from_merged <- function(
                size = point_size)
 
   if (regression) {
-    db.DE.scatter.regression = DB_DE_regression_model(sig_merged_df)
+    # Since there is no straightforward way to access the model object within geom_smooth(),
+    # we fit the model externally to retrieve summary details from the glm object.
+    DB.DE.scatter.regression = DB_DE_regression_model(sig_merged_df)
     p <- p + geom_smooth(method = glm, color = line_color)
   }
 
