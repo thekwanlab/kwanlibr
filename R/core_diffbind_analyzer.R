@@ -176,10 +176,29 @@ get_diffbind_sites <- function(
     stop("Invalid contrast_number. Please provide a valid contrast index.")
   }
 
-  sites <- as.data.frame(dba.report(dba_object, contrast = contrast_number, th = fdr_threshold))
+  # Initialize a flag variable to FALSE, used to track if the specific DiffBind warning
+  # "No sites above threshold" was triggered.
+  warning_triggered <- FALSE
 
-  if (is.null(sites)) {
-    stop("No sites found in the report. Please check your contrast setup.")
+  # Call dba.report() and convert its result to a data frame, while intercepting warnings.
+  # The withCallingHandlers function allows us to "catch" warnings when they are issued:
+  sites <- withCallingHandlers({
+    as.data.frame(dba.report(dba_object, contrast = contrast_number, th = fdr_threshold))
+  }, warning = function(w) {
+    if (grepl("No sites above threshold", w$message)) {
+      warning_triggered <<- TRUE           # set flag for custom warning later
+      invokeRestart("muffleWarning")       # suppress default warning
+    }
+  })
+
+  # If no sites found or fdr threshold is too stringent, produce the error
+  if (is.null(sites) || warning_triggered) {
+    stop(paste(
+      "No sites or significant sites were found for your comparison.",
+      "This can happen if your FDR cutoff is too strict or if the contrast settings need adjustment.",
+      "Try increasing the FDR threshold or reviewing your experimental contrast.",
+      sep = "\n"
+    ))
   }
 
   if (verbose) {
