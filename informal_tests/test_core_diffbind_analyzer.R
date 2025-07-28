@@ -76,16 +76,10 @@ make_diffbind_volcano_plot(dba.obj,
 #================
 # Test merge_diffbind_with_DE
 #================
-dba.obj <- readRDS("/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/dba_obj_mll_me1.RDS")
 options(scipen = 15)
 merged_data <- merge_diffbind_with_DE(dba.obj,
-                                      DE_file_path = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
-                                      tss_file_path = "/nfs/turbo/umms-kykwan/projects/mll/h3k4_me1_cutntag/diffbind_files/TSS.bed",
-                                      save_directory = file.path(config$paths$test_results_dump, "diffbind_figures"))
-
-merged_data <- merge_diffbind_with_DE(dba.obj,
-                                      DE_file_path = "/nfs/turbo/umms-kykwan/projects/mll/bulk_rna_seq/tables/mll_edgeR.csv",
-                                      tss_file_path = "/nfs/turbo/umms-kykwan/projects/reference/tss/TSS_mm10_gencode.bed",
+                                      DE_file_path = config$paths$binding_sites_gene_expression_example,
+                                      tss_file_path = config$paths$binding_sites_transcription_start_site_example,
                                       save_directory = file.path(config$paths$test_results_dump, "diffbind_figures"))
 #=================
 # Test make_diffbind_volcano_plot_from_merged
