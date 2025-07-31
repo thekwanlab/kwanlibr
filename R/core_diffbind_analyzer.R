@@ -48,10 +48,9 @@
 #' @param min_members Minimum number of replicates per condition.
 #' Set to 2 if any condition has only 2 replicates, otherwise set to \code{NULL}.
 #' @param analysis_method The analysis method, either \code{DBA_DESEQ2} or \code{DBA_EDGER}.
-#' @param fdr_threshold FDR cutoff for significance, used in both filtering
-#' and visualization.
+#' @param fdr_threshold FDR cutoff for significance, used in both filtering and visualization.
 #' @param normalization Normalization method. One of \code{DBA_NORM_LIB}, \code{DBA_NORM_RLE},
-#' \code{DBA_NORM_TMM}, etc. See DiffBind documentation
+#' \code{DBA_NORM_TMM}, etc. See DiffBind documentation.
 #' @return analyzed diffbind object
 #' @keywords diffbind
 #' @export
@@ -123,8 +122,7 @@ perform_diffbind <- function(
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
 #' @param file_suffix Character. Suffix for the output DBA object file.
 #' @param save_directory Character. Directory path to save the resulting
-#' DBA object (default is \code{NULL}). If \code{NULL}, current working
-#' directory is used.
+#' DBA object. If \code{NULL}, current working directory is used.
 #' @export
 #' @examples
 #' save_diffbind_object(
@@ -156,9 +154,8 @@ save_diffbind_object <- function(
 #'
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
 #' @param fdr_threshold Numeric. Significance cutoff for filtering DB sites.
-#' Default is \code{0.05}.
 #' @param contrast_number Integer. Index specifying which contrast to extract
-#' results from. Defaults to \code{1} corresponding to the first contrast.
+#' results from.
 #' @param verbose Boolean. If true, it prints information on number of DB sites.
 #' Silent if false.
 #' @return A dataframe that contains filtered sites information.
@@ -218,9 +215,9 @@ get_diffbind_sites <- function(
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
 #' @param save_directory Character. Output directory where results are written.
 #' @param fdr_threshold Numeric. FDR cutoff for significantly differntially
-#' bound up and down sites
+#' bound up and down sites.
 #' @param contrast_number Integer. Index specifying which contrast to extract
-#' results from. Defaults to \code{1} corresponding to the first contrast.
+#' results from.
 #' @export
 #' @examples
 #' save_diffbind_sites(
@@ -318,15 +315,15 @@ save_diffbind_sites <- function(
 #' @param dba_object DBA object obtained after \code{perform_diffbind()}.
 #' @param figure_title Character. Title for density plot.
 #' @param save_name Character. Base name used for saving the plot files.
-#' @param fdr_threshold Numeric. FDR cutoff for DB significance (Default is 1).
+#' @param fdr_threshold Numeric. FDR cutoff for DB significance.
 #' @param save_directory Character. Directory path where the plot files will be saved.
-#' Default is set to \code{NULL}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
-#' DBA object. Defeault is set to \code{1}.
-#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Setting to NULL frees the limits
-#' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
-#' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
-#' @param color Character. Color to fill the density plot. Default is \code{"aquamarine4"}.
+#' DBA object.
+#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Setting to 
+#' \code{NULL} frees the limits.
+#' @param width Numeric. Width dimensions of saved plot in inches.
+#' @param height Numeric. Height dimensions of saved plot in inches.
+#' @param color Character. Color to fill the density plot.
 #' @return A ggplot object of density plot.
 #' @keywords Density Plot
 #' @export
@@ -397,12 +394,12 @@ make_diffbind_density_plot <- function(
 #' @param save_directory Character. Directory path where output plots will be saved.
 #' @param save_name Character. Base name (without extension) for the saved plot files.
 #' @param figure_title_contrast Character. Title for the PCA plot using only differentially
-#' bound regions. Default is \code{NULL}.
-#' @param point_size Numeric. Size of the points, default is set to 8.
-#' @param width Numeric. Width dimensions of saved plot in inches. Default is 20.
-#' @param height Numeric. Height dimensions of saved plot in inches. Default is 9.
+#' bound regions.
+#' @param point_size Numeric. Size of the points.
+#' @param width Numeric. Width dimensions of saved plot in inches.
+#' @param height Numeric. Height dimensions of saved plot in inches.
 #' @param color Character vector of length 2. Colors to use for the two biological conditions
-#' in PCA plots. Default is \code{c("darkmagenta", "aquamarine4")}.
+#' in PCA plots.
 #' @return A \code{gridExtra} object containing a side-by-side layout of two PCA plots.
 #' @keywords PCA plot
 #' @importFrom gridExtra grid.arrange
@@ -493,7 +490,7 @@ make_diffbind_PCA_plot <- function(
 #'
 #' @param dba_object DBA object (RDS format) generated by \code{perform_diffbind()}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
-#' DBA object. Defeault is set to \code{1}.
+#' DBA object.
 #' @param fdr_threshold Numeric. FDR cutoff for significance.
 #' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.
 #' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}.
@@ -543,20 +540,18 @@ get_diffbind_volcano_data <- function(
 #' @param dba_object DBA object (RDS format) generated by \code{perform_diffbind()}.
 #' @param figure_title Character. Figure title for volcano plot, ex. "h3k27me3 cKO vs cHET"
 #' @param save_name Character. Base name for the output volcano plot figures.
-#' @param save_directory Character. Directory path where the output plots will
-#' be saved. Default is \code{NULL}.
-#' @param point_size Numeric. Size of the points in volcano plots, default is set to 1.
+#' @param save_directory Character. Directory path where the output plots will be saved.
+#' @param point_size Numeric. Size of the points in volcano plots.
 #' @param point_alpha Numeric. Transparency level of the points. Ranges from 0 (fully
-#' transparent) to 1 (fully opaque). Default is \code{1}.
-#' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
-#' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
+#' transparent) to 1 (fully opaque).
+#' @param width Numeric. Width dimensions of saved plot in inches.
+#' @param height Numeric. Height dimensions of saved plot in inches.
 #' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.
 #' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}.
-#' @param contrast_number Integer. Index indicating which contrast to extract from
-#' the DBA object. Defeault is set to \code{1}.
-#' @param fdr_threshold Numeric. The FDR threshold used for grouping, default is \code{0.05}.
+#' @param contrast_number Integer. Index indicating which contrast to extract from the DBA object.
+#' @param fdr_threshold Numeric. The FDR threshold used for grouping.
 #' @param color Character vector of length 2. One for insignificant DB sites, one for significant
-#' DB sites. Usually 'grey' is for insignificant sites. By default, it is \code{c('aquamarine4', 'grey')}
+#' DB sites.
 #' @return A ggplot object of volcano plot
 #' @keywords volcano plot
 #' @export
@@ -633,7 +628,7 @@ make_diffbind_volcano_plot <- function(
 #' @param save_directory Character. Directory path for storing intermediate files, including the TSS
 #' BED file, sorted BED file, and nearest gene lookup TSV.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
-#' DBA object. Defeault is set to \code{1}.
+#' DBA object.
 #' @return A data frame containing merged binding and expression data. Each row corresponds to
 #' a binding site and includes:
 #' \itemize{
@@ -745,18 +740,17 @@ merge_diffbind_with_DE <- function(
 #' @param save_name Character. Output figure save_name (e.g., "volcano.png").
 #' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.
 #' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}.
-#' @param point_size Numeric. Point size in the plot. Default is \code{1}.
+#' @param point_size Numeric. Point size in the plot.
 #' @param point_alpha Numeric. Transparency level of the points. Ranges from 0 (fully
-#' transparent) to 1 (fully opaque). Default is \code{1}.
-#' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
-#' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
+#' transparent) to 1 (fully opaque).
+#' @param width Numeric. Width dimensions of saved plot in inches.
+#' @param height Numeric. Height dimensions of saved plot in inches.
 #' @param DB_fdr_cutoff Numeric. Significance threshold for FDR in differential binding
-#' dataframe. Default is 0.05.
+#' dataframe.
 #' @param DE_fdr_cutoff Numeric. Significance threshold for FDR in RNA-seq differential
-#' expression. Defualt is 0.05.
-#' @param color Character vector of length 2, in order of down FC color, then up FC
-#' color. default is set to \code{c('steelblue', 'tomato')}.
-#' @return A ggplot object of DB and DE merged volcano plot
+#' expression.
+#' @param color Character vector of length 2, in order of down FC color, then up FC color.
+#' @return A ggplot object of DB and DE merged volcano plot.
 #' @export
 #' @examples
 #' make_diffbind_volcano_plot_from_merged(
@@ -843,8 +837,8 @@ make_diffbind_volcano_plot_from_merged <- function(
 #' the association between DE and DB data. It regresses \code{DE.logFC} against
 #' \code{DB.logFC} in a merged data frame.
 #'
-#' @param merged_df Merged data generated from running \code{merge_diffbind_with_DE()}
-#' @return An object of class inheriting from 'glm'
+#' @param merged_df Merged data generated from running \code{merge_diffbind_with_DE()}.
+#' @return An object of class inheriting from 'glm'.
 #' @details The summary of the regression is printed to the console.
 #' @export
 #' @examples
@@ -870,18 +864,17 @@ DB_DE_regression_model <- function(
 #' @param figure_title Character. The scatter plot title.
 #' @param save_directory Character. Directory to save the figure output.
 #' @param save_name Character. The base name of the scatter plot file.
-#' @param width Numeric. Width dimensions of saved plot in inches. Default is 8.
-#' @param height Numeric. Height dimensions of saved plot in inches. Default is 6.
-#' @param point_size Numeric. The size of the point in scatter plot. Default is 1.
-#' @param regression logical value. Default is set to 'TRUE', a regression line is
-#' drawn to the scatter plot. otherwise no regression line.
+#' @param width Numeric. Width dimensions of saved plot in inches.
+#' @param height Numeric. Height dimensions of saved plot in inches.
+#' @param point_size Numeric. The size of the point in scatter plot.
+#' @param regression logical value of whether a regression line is requested on the scatter plot.
 #' @param DB_fdr_cutoff Numeric. Significance threshold for FDR in differential binding
-#' dataframe. Default is 0.05.
+#' dataframe.
 #' @param DE_fdr_cutoff Numeric. Significance threshold for FDR in RNA-seq differential
-#' expression. Default is 1.
-#' @param point_color Character Value. The color of the point. Default is \code{'black'}.
-#' @param line_color Character Value. The color of the regression line. Default is
-#' \code{'aquamarine4'}.
+#' expression. when setting it to 1, it will include all the genes so we can look for overall
+#' trends.
+#' @param point_color Character Value. The color of the point.
+#' @param line_color Character Value. The color of the regression line.
 #' @import tools
 #' @return ggplot object of scatter plot
 #' @export
