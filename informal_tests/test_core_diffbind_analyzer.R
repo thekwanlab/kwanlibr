@@ -73,6 +73,12 @@ make_diffbind_volcano_plot(dba.obj,
                            save_directory=file.path(config$paths$test_results_dump, "diffbind_figures"),
                            point_size = 2,
                            point_alpha = 0.8)
+
+make_diffbind_volcano_plot(dba.obj,
+                           figure_title="h3k27ac cKO vs cHET",
+                           save_name="db_volcano_h3k27ac",
+                           save_directory=file.path(config$paths$test_results_dump, "diffbind_figures"),
+                           fdr_threshold = 0.0)
 #================
 # Test merge_diffbind_with_DE
 #================

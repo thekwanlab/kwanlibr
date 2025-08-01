@@ -191,10 +191,9 @@ get_diffbind_sites <- function(
   # If no sites found or fdr threshold is too stringent, produce the error
   if (is.null(sites) || warning_triggered) {
     stop(paste(
-      "No sites or significant sites were found for your comparison.",
+      "No significant sites were found for your comparison.",
       "This can happen if your FDR cutoff is too strict or if the contrast settings need adjustment.",
-      "Try increasing the FDR threshold or reviewing your experimental contrast.",
-      sep = "\n"
+      "Try increasing the FDR threshold or reviewing your experimental contrast."
     ))
   }
 
@@ -319,7 +318,7 @@ save_diffbind_sites <- function(
 #' @param save_directory Character. Directory path where the plot files will be saved.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the
 #' DBA object.
-#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Setting to 
+#' @param xdiff Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Setting to
 #' \code{NULL} frees the limits.
 #' @param width Numeric. Width dimensions of saved plot in inches.
 #' @param height Numeric. Height dimensions of saved plot in inches.
@@ -510,10 +509,17 @@ get_diffbind_volcano_data <- function(
                       fdr_threshold = 1,
                       contrast_number = contrast_number,
                       verbose = FALSE)
-  sig.sites <- get_diffbind_sites(dba_object,
-                          fdr_threshold = fdr_threshold,
-                          contrast_number = contrast_number,
-                          verbose = FALSE)
+  sig.sites <- tryCatch(
+    get_diffbind_sites(
+      dba_object,
+      fdr_threshold = fdr_threshold,
+      contrast_number = contrast_number,
+      verbose = FALSE)
+    , error = function(message) {
+      message(message)
+      head(sites, 0) # If no signifcant sites, stack an empty dataframe
+    }
+  )
 
   downsampled_nonsig_sites <- sites %>%
     filter(FDR > fdr_threshold) %>%
@@ -526,7 +532,9 @@ get_diffbind_volcano_data <- function(
            negLogFDR = kwanlibr::clamp(negLogFDR, 0, ymax)) %>%
     mutate(FDR_is_significant = if_else(FDR <= fdr_threshold,
                                         paste('<=',fdr_threshold),
-                                        paste('>',fdr_threshold)))
+                                        paste('>',fdr_threshold))) %>%
+    mutate(FDR_is_significant = factor(FDR_is_significant, 
+                                       levels = paste(c('>','<='), fdr_threshold)))
   return(volcano.sites)
 }
 
@@ -575,7 +583,7 @@ make_diffbind_volcano_plot <- function(
     ymax=20,
     contrast_number=1,
     fdr_threshold=0.05,
-    color=c('aquamarine4', 'grey')
+    color=c('grey', 'aquamarine4')
 ){
 
   if (is.null(save_directory)) {
