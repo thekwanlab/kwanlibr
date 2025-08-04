@@ -32,11 +32,10 @@ Set to 2 if any condition has only 2 replicates, otherwise set to \code{NULL}.}
 
 \item{analysis_method}{The analysis method, either \code{DBA_DESEQ2} or \code{DBA_EDGER}.}
 
-\item{fdr_threshold}{FDR cutoff for significance, used in both filtering
-and visualization.}
+\item{fdr_threshold}{FDR cutoff for significance, used in both filtering and visualization.}
 
 \item{normalization}{Normalization method. One of \code{DBA_NORM_LIB}, \code{DBA_NORM_RLE},
-\code{DBA_NORM_TMM}, etc. See DiffBind documentation}
+\code{DBA_NORM_TMM}, etc. See DiffBind documentation.}
 }
 \value{
 analyzed diffbind object

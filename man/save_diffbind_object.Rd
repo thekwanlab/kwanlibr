@@ -12,8 +12,7 @@ save_diffbind_object(dba_object, file_suffix, save_directory = NULL)
 \item{file_suffix}{Character. Suffix for the output DBA object file.}
 
 \item{save_directory}{Character. Directory path to save the resulting
-DBA object (default is \code{NULL}). If \code{NULL}, current working
-directory is used.}
+DBA object. If \code{NULL}, current working directory is used.}
 }
 \description{
 save_diffbind_object(dba_object, file_suffix, save_directory) saves the

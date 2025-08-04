@@ -17,10 +17,10 @@ save_diffbind_sites(
 \item{save_directory}{Character. Output directory where results are written.}
 
 \item{fdr_threshold}{Numeric. FDR cutoff for significantly differntially
-bound up and down sites}
+bound up and down sites.}
 
 \item{contrast_number}{Integer. Index specifying which contrast to extract
-results from. Defaults to \code{1} corresponding to the first contrast.}
+results from.}
 }
 \description{
 save_diffbind_sites(dba_object, save_directory, fdr_threshold, contrast_number) saves site

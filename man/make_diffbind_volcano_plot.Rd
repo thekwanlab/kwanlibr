@@ -17,7 +17,7 @@ make_diffbind_volcano_plot(
   ymax = 20,
   contrast_number = 1,
   fdr_threshold = 0.05,
-  color = c("aquamarine4", "grey")
+  color = c("grey", "aquamarine4")
 )
 }
 \arguments{
@@ -27,29 +27,27 @@ make_diffbind_volcano_plot(
 
 \item{save_name}{Character. Base name for the output volcano plot figures.}
 
-\item{save_directory}{Character. Directory path where the output plots will
-be saved. Default is \code{NULL}.}
+\item{save_directory}{Character. Directory path where the output plots will be saved.}
 
-\item{point_size}{Numeric. Size of the points in volcano plots, default is set to 1.}
+\item{point_size}{Numeric. Size of the points in volcano plots.}
 
 \item{point_alpha}{Numeric. Transparency level of the points. Ranges from 0 (fully
-transparent) to 1 (fully opaque). Default is \code{1}.}
+transparent) to 1 (fully opaque).}
 
-\item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
+\item{width}{Numeric. Width dimensions of saved plot in inches.}
 
-\item{height}{Numeric. Height dimensions of saved plot in inches. Default is 6.}
+\item{height}{Numeric. Height dimensions of saved plot in inches.}
 
 \item{xdiff}{Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}.}
 
 \item{ymax}{Numeric. Limits the y-axis range to \code{[0, ymax]}.}
 
-\item{contrast_number}{Integer. Index indicating which contrast to extract from
-the DBA object. Defeault is set to \code{1}.}
+\item{contrast_number}{Integer. Index indicating which contrast to extract from the DBA object.}
 
-\item{fdr_threshold}{Numeric. The FDR threshold used for grouping, default is \code{0.05}.}
+\item{fdr_threshold}{Numeric. The FDR threshold used for grouping.}
 
 \item{color}{Character vector of length 2. One for insignificant DB sites, one for significant
-DB sites. Usually 'grey' is for insignificant sites. By default, it is \code{c('aquamarine4', 'grey')}}
+DB sites.}
 }
 \value{
 A ggplot object of volcano plot

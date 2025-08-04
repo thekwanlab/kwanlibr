@@ -14,11 +14,10 @@ get_diffbind_sites(
 \arguments{
 \item{dba_object}{DBA object obtained after \code{perform_diffbind()}.}
 
-\item{fdr_threshold}{Numeric. Significance cutoff for filtering DB sites.
-Default is \code{0.05}.}
+\item{fdr_threshold}{Numeric. Significance cutoff for filtering DB sites.}
 
 \item{contrast_number}{Integer. Index specifying which contrast to extract
-results from. Defaults to \code{1} corresponding to the first contrast.}
+results from.}
 
 \item{verbose}{Boolean. If true, it prints information on number of DB sites.
 Silent if false.}

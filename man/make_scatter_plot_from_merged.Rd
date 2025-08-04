@@ -28,25 +28,24 @@ make_scatter_plot_from_merged(
 
 \item{save_name}{Character. The base name of the scatter plot file.}
 
-\item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
+\item{width}{Numeric. Width dimensions of saved plot in inches.}
 
-\item{height}{Numeric. Height dimensions of saved plot in inches. Default is 6.}
+\item{height}{Numeric. Height dimensions of saved plot in inches.}
 
-\item{point_size}{Numeric. The size of the point in scatter plot. Default is 1.}
+\item{point_size}{Numeric. The size of the point in scatter plot.}
 
-\item{regression}{logical value. Default is set to 'TRUE', a regression line is
-drawn to the scatter plot. otherwise no regression line.}
+\item{regression}{logical value of whether a regression line is requested on the scatter plot.}
 
 \item{DB_fdr_cutoff}{Numeric. Significance threshold for FDR in differential binding
-dataframe. Default is 0.05.}
+dataframe.}
 
 \item{DE_fdr_cutoff}{Numeric. Significance threshold for FDR in RNA-seq differential
-expression. Default is 1.}
+expression. when setting it to 1, it will include all the genes so we can look for overall
+trends.}
 
-\item{point_color}{Character Value. The color of the point. Default is \code{'black'}.}
+\item{point_color}{Character Value. The color of the point.}
 
-\item{line_color}{Character Value. The color of the regression line. Default is
-\code{'aquamarine4'}.}
+\item{line_color}{Character Value. The color of the regression line.}
 }
 \value{
 ggplot object of scatter plot

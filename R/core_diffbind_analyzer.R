@@ -239,38 +239,49 @@ save_diffbind_sites <- function(
     dir.create(save_directory, recursive = TRUE)
   }
 
-  sig.sites <- get_diffbind_sites(dba_object,
-                           fdr_threshold = fdr_threshold,
-                           contrast_number = contrast_number,
-                           verbose = FALSE)
+  tryCatch({
+    sig.sites <- get_diffbind_sites(dba_object,
+                            fdr_threshold = fdr_threshold,
+                            contrast_number = contrast_number,
+                            verbose = FALSE)
 
-  #UpDB.sites sorted by FDR
-  upDB.sites <- sig.sites %>%
-    filter(Fold > 0) %>%
-    mutate(Score = -log10(FDR)) %>%
-    tibble::rownames_to_column('site.id') %>%
-    arrange(FDR) %>%
-    select(Chr, Start, End, site.id, Score) %>%
-    mutate(Position = paste0(Chr, ':', Start, "-", End))
+    #UpDB.sites sorted by FDR
+    upDB.sites <- sig.sites %>%
+      filter(Fold > 0) %>%
+      mutate(Score = -log10(FDR)) %>%
+      tibble::rownames_to_column('site.id') %>%
+      arrange(FDR) %>%
+      select(Chr, Start, End, site.id, Score) %>%
+      mutate(Position = paste0(Chr, ':', Start, "-", End))
 
-  upDB_sites_file_name = file.path(save_directory, 'upDB_sites.bed')
-  write.table(upDB.sites, file = upDB_sites_file_name,
-              quote = FALSE, sep = '\t',
-              row.names = FALSE, col.names = FALSE)
+    upDB_sites_file_name = file.path(save_directory, 'upDB_sites.bed')
+    write.table(upDB.sites, file = upDB_sites_file_name,
+                quote = FALSE, sep = '\t',
+                row.names = FALSE, col.names = FALSE)
 
-  #DownDB.sites sorted by FDR
-  DownDB.sites <- sig.sites %>%
-    filter(Fold < 0) %>%
-    mutate(Score = -log10(FDR)) %>%
-    tibble::rownames_to_column('site.id') %>%
-    arrange(FDR) %>%
-    select(Chr, Start, End, site.id, Score) %>%
-    mutate(Position = paste0(Chr, ':', Start, "-", End))
+    #DownDB.sites sorted by FDR
+    DownDB.sites <- sig.sites %>%
+      filter(Fold < 0) %>%
+      mutate(Score = -log10(FDR)) %>%
+      tibble::rownames_to_column('site.id') %>%
+      arrange(FDR) %>%
+      select(Chr, Start, End, site.id, Score) %>%
+      mutate(Position = paste0(Chr, ':', Start, "-", End))
 
-  downDB_sites_file_name = file.path(save_directory, 'downDB_sites.bed')
-  write.table(DownDB.sites, file = downDB_sites_file_name,
-              quote = FALSE, sep = '\t',
-              row.names = FALSE, col.names = FALSE)
+    downDB_sites_file_name = file.path(save_directory, 'downDB_sites.bed')
+    write.table(DownDB.sites, file = downDB_sites_file_name,
+                quote = FALSE, sep = '\t',
+                row.names = FALSE, col.names = FALSE)
+
+    message(paste(
+      'Files saved:',
+      upDB_sites_file_name,
+      downDB_sites_file_name,
+      sep='\n'))
+  }, error = function(message) {
+    message(message)
+    message("No differential binding sites detected. Omitting files.")
+  })
 
   all.sites <- get_diffbind_sites(dba_object,
                           fdr_threshold = 1,
@@ -297,8 +308,6 @@ save_diffbind_sites <- function(
 
   message(paste(
     'Files saved:',
-    upDB_sites_file_name,
-    downDB_sites_file_name,
     consensus_sites_file_name,
     sep='\n'))
   options(scipen = old.scipen)
@@ -517,7 +526,7 @@ get_diffbind_volcano_data <- function(
       verbose = FALSE)
     , error = function(message) {
       message(message)
-      head(sites, 0) # If no signifcant sites, stack an empty dataframe
+      return(head(sites, 0)) # If no signifcant sites, stack an empty dataframe
     }
   )
 

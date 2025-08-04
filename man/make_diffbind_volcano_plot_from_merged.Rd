@@ -33,26 +33,25 @@ make_diffbind_volcano_plot_from_merged(
 
 \item{ymax}{Numeric. Limits the y-axis range to \code{[0, ymax]}.}
 
-\item{point_size}{Numeric. Point size in the plot. Default is \code{1}.}
+\item{point_size}{Numeric. Point size in the plot.}
 
 \item{point_alpha}{Numeric. Transparency level of the points. Ranges from 0 (fully
-transparent) to 1 (fully opaque). Default is \code{1}.}
+transparent) to 1 (fully opaque).}
 
-\item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
+\item{width}{Numeric. Width dimensions of saved plot in inches.}
 
-\item{height}{Numeric. Height dimensions of saved plot in inches. Default is 6.}
+\item{height}{Numeric. Height dimensions of saved plot in inches.}
 
 \item{DB_fdr_cutoff}{Numeric. Significance threshold for FDR in differential binding
-dataframe. Default is 0.05.}
+dataframe.}
 
 \item{DE_fdr_cutoff}{Numeric. Significance threshold for FDR in RNA-seq differential
-expression. Defualt is 0.05.}
+expression.}
 
-\item{color}{Character vector of length 2, in order of down FC color, then up FC
-color. default is set to \code{c('steelblue', 'tomato')}.}
+\item{color}{Character vector of length 2, in order of down FC color, then up FC color.}
 }
 \value{
-A ggplot object of DB and DE merged volcano plot
+A ggplot object of DB and DE merged volcano plot.
 }
 \description{
 make_diffbind_volcano_plot_from_merged(merged_df, figure_title, save_directory, save_name,

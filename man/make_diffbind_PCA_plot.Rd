@@ -25,18 +25,18 @@ regions.}
 \item{save_name}{Character. Base name (without extension) for the saved plot files.}
 
 \item{figure_title_contrast}{Character. Title for the PCA plot using only differentially
-bound regions. Default is \code{NULL}.}
+bound regions.}
 
 \item{save_directory}{Character. Directory path where output plots will be saved.}
 
-\item{point_size}{Numeric. Size of the points, default is set to 8.}
+\item{point_size}{Numeric. Size of the points.}
 
-\item{width}{Numeric. Width dimensions of saved plot in inches. Default is 20.}
+\item{width}{Numeric. Width dimensions of saved plot in inches.}
 
-\item{height}{Numeric. Height dimensions of saved plot in inches. Default is 9.}
+\item{height}{Numeric. Height dimensions of saved plot in inches.}
 
 \item{color}{Character vector of length 2. Colors to use for the two biological conditions
-in PCA plots. Default is \code{c("darkmagenta", "aquamarine4")}.}
+in PCA plots.}
 }
 \value{
 A \code{gridExtra} object containing a side-by-side layout of two PCA plots.

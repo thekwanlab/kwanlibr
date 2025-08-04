@@ -26,7 +26,7 @@ with Differential binding sites.}
 BED file, sorted BED file, and nearest gene lookup TSV.}
 
 \item{contrast_number}{Integer. Index indicating which contrast to extract from the
-DBA object. Defeault is set to \code{1}.}
+DBA object.}
 }
 \value{
 A data frame containing merged binding and expression data. Each row corresponds to

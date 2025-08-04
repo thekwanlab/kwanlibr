@@ -30,6 +30,9 @@ all.sites <- get_diffbind_sites(dba_object=dba.obj, fdr_threshold = 1)
 # ==============
 save_diffbind_sites(dba.obj,
                     save_directory = file.path(config$paths$test_results_dump, "diffbind_files"))
+save_diffbind_sites(dba.obj,
+                    save_directory = file.path(config$paths$test_results_dump, "diffbind_files"),
+                    fdr_threshold = 0.0)
 
 #===============
 # Test make_diffbind_density_plot
@@ -44,6 +47,12 @@ make_diffbind_density_plot(dba.obj,
                            save_name="df_fold_density_h3k27ac",
                            save_directory = file.path(config$paths$test_results_dump, "diffbind_figures"),
                            xdiff = 1)
+
+make_diffbind_density_plot(dba.obj,
+                           figure_title="Distribution of Differential Binding Regions",
+                           save_name="df_fold_density_h3k27ac",
+                           save_directory = file.path(config$paths$test_results_dump, "diffbind_figures"),
+                           fdr_threshold = 0.0)
 
 #===============
 # Test make_diffbind_PCA_plot
@@ -63,6 +72,7 @@ make_diffbind_PCA_plot(dba.obj,
 # Test get_diffbind_volcano_data
 #===============
 volcano.sites <- get_diffbind_volcano_data(dba.obj, xdiff=1, ymax=10)
+volcano.sites <- get_diffbind_volcano_data(dba.obj, xdiff=1, ymax=10, fdr_threshold = 0.0)
 
 #===============
 # Test make_diffbind_volcano_plot
@@ -90,16 +100,32 @@ merged_data <- merge_diffbind_with_DE(dba.obj,
 #=================
 # Test make_diffbind_volcano_plot_from_merged
 #=================
-make_diffbind_volcano_plot_from_merged(merged_df = merged_data,
-                              figure_title=paste0('cKO vs cHet Differential Binding sites', '\n[ color by nearest TSS bulkRNAseq logFC, filtered by bulkRNAseq FDR < 0.05 ]'),
-                              save_directory=file.path(config$paths$test_results_dump, "diffbind_figures"),
-                              save_name="db_volcano_bulk_color_binary_h3k4me1",
-                              xdiff = 2,
-                              ymax = 17.5,
-                              point_size = 2,
-                              point_alpha = 1,
-                              width = 8,
-                              height = 6)
+make_diffbind_volcano_plot_from_merged(
+  merged_df = merged_data,
+  figure_title=paste0('cKO vs cHet Differential Binding sites', '\n[ color by nearest TSS bulkRNAseq logFC, filtered by bulkRNAseq FDR < 0.05 ]'),
+  save_directory=file.path(config$paths$test_results_dump, "diffbind_figures"),
+  save_name="db_volcano_bulk_color_binary_h3k4me1",
+  xdiff = 2,
+  ymax = 17.5,
+  point_size = 2,
+  point_alpha = 1,
+  width = 8,
+  height = 6)
+
+make_diffbind_volcano_plot_from_merged(
+  merged_df = merged_data,
+  figure_title=paste0('cKO vs cHet Differential Binding sites', '\n[ color by nearest TSS bulkRNAseq logFC, filtered by bulkRNAseq FDR < 0.05 ]'),
+  save_directory=file.path(config$paths$test_results_dump, "diffbind_figures"),
+  save_name="db_volcano_bulk_color_binary_h3k4me1",
+  xdiff = 2,
+  ymax = 17.5,
+  point_size = 2,
+  point_alpha = 1,
+  width = 8,
+  height = 6,
+  DE_fdr_cutoff = 0.0,
+  DB_fdr_cutoff = 0.0)
+
 
 # ==============
 # Test add_DB_DE_regression

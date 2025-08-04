@@ -7,10 +7,10 @@
 DB_DE_regression_model(merged_df)
 }
 \arguments{
-\item{merged_df}{Merged data generated from running \code{merge_diffbind_with_DE()}}
+\item{merged_df}{Merged data generated from running \code{merge_diffbind_with_DE()}.}
 }
 \value{
-An object of class inheriting from 'glm'
+An object of class inheriting from 'glm'.
 }
 \description{
 DB_DE_regression_model(merged_df) fits a generalized linear model (GLM) to test

@@ -24,21 +24,21 @@ make_diffbind_density_plot(
 
 \item{save_name}{Character. Base name used for saving the plot files.}
 
-\item{fdr_threshold}{Numeric. FDR cutoff for DB significance (Default is 1).}
+\item{fdr_threshold}{Numeric. FDR cutoff for DB significance.}
 
-\item{save_directory}{Character. Directory path where the plot files will be saved.
-Default is set to \code{NULL}.}
+\item{save_directory}{Character. Directory path where the plot files will be saved.}
 
 \item{contrast_number}{Integer. Index indicating which contrast to extract from the
-DBA object. Defeault is set to \code{1}.}
+DBA object.}
 
-\item{xdiff}{Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Setting to NULL frees the limits}
+\item{xdiff}{Numeric. Limits the x-axis range to \code{[-xdiff, xdiff]}. Setting to
+\code{NULL} frees the limits.}
 
-\item{width}{Numeric. Width dimensions of saved plot in inches. Default is 8.}
+\item{width}{Numeric. Width dimensions of saved plot in inches.}
 
-\item{height}{Numeric. Height dimensions of saved plot in inches. Default is 6.}
+\item{height}{Numeric. Height dimensions of saved plot in inches.}
 
-\item{color}{Character. Color to fill the density plot. Default is \code{"aquamarine4"}.}
+\item{color}{Character. Color to fill the density plot.}
 }
 \value{
 A ggplot object of density plot.
