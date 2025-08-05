@@ -567,8 +567,8 @@ get_diffbind_volcano_data <- function(
 #' @param ymax Numeric. Limits the y-axis range to \code{[0, ymax]}.
 #' @param contrast_number Integer. Index indicating which contrast to extract from the DBA object.
 #' @param fdr_threshold Numeric. The FDR threshold used for grouping.
-#' @param color Character vector of length 2. One for insignificant DB sites, one for significant
-#' DB sites.
+#' @param color Character vector of length 2. First element is the color for insignificant DB sites.
+#' Second element is the color for significant DB sites.
 #' @return A ggplot object of volcano plot
 #' @keywords volcano plot
 #' @export
