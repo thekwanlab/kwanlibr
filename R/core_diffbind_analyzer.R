@@ -711,7 +711,7 @@ merge_diffbind_with_DE <- function(
   # run bash commands to retrieve the nearest gene ID
   allDB_bed <- file.path(save_directory, "allDB_sites.bed")
   lookup_tsv <- file.path(save_directory, "DB_site_nearest_gene_lookup.tsv")
-  sorted_bed <- tempfile(pattern = "sorted_allDB_sites_", tmpdir = save_directory, fileext = ".bed")
+  sorted_bed <- file.path(save_directory, "sorted_allDB_site.bed")
 
   system(paste("module load Bioinformatics bedops/2.4.41 &&",
                "sort-bed", allDB_bed, ">", sorted_bed,
