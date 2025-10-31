@@ -46,8 +46,8 @@ transparent) to 1 (fully opaque).}
 
 \item{fdr_threshold}{Numeric. The FDR threshold used for grouping.}
 
-\item{color}{Character vector of length 2. One for insignificant DB sites, one for significant
-DB sites.}
+\item{color}{Character vector of length 2. First element is the color for insignificant DB sites.
+Second element is the color for significant DB sites.}
 }
 \value{
 A ggplot object of volcano plot

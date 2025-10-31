@@ -542,7 +542,7 @@ get_diffbind_volcano_data <- function(
     mutate(FDR_is_significant = if_else(FDR <= fdr_threshold,
                                         paste('<=',fdr_threshold),
                                         paste('>',fdr_threshold))) %>%
-    mutate(FDR_is_significant = factor(FDR_is_significant, 
+    mutate(FDR_is_significant = factor(FDR_is_significant,
                                        levels = paste(c('>','<='), fdr_threshold)))
   return(volcano.sites)
 }
@@ -608,6 +608,8 @@ make_diffbind_volcano_plot <- function(
                                       fdr_threshold = fdr_threshold,
                                       xdiff = xdiff,
                                       ymax = ymax)
+  # sort so significant points are plotted on top
+  volcano.sites <- volcano.sites %>% arrange(desc(FDR))
 
   p <- ggplot(data = volcano.sites, aes(x = Fold, y = negLogFDR, color = FDR_is_significant)) +
     geom_point(size = point_size, alpha = point_alpha) +
